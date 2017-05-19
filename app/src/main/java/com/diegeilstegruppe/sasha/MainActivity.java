@@ -1,15 +1,12 @@
 package com.diegeilstegruppe.sasha;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
+import android.support.v7.app.AppCompatActivity;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
-
-    private boolean recording = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -17,20 +14,18 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         final TextView text = (TextView) findViewById(R.id.textView);
 
-        Button button = (Button) findViewById(R.id.dummy_button);
-        button.setOnClickListener(new View.OnClickListener() {
+        final Switch switch_activated = (Switch) findViewById(R.id.switch_activated);
+        switch_activated.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onClick(View v) {
-                if(recording) {
-                    text.setText("Not recording");
-                    recording = false;
-                } else {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked) {
                     text.setText("Recording");
-                    recording = true;
+                } else {
+                    text.setText("Not recording");
                 }
-
             }
         });
+
     }
 
 
