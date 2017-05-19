@@ -9,7 +9,9 @@
 
     <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
+        android:layout_height="fill_parent"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="0dp">
 
         <ImageView
             android:id="@+id/imageView"
