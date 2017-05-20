@@ -9,12 +9,11 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.diegeilstegruppe.sasha.audio.Speech;
-import com.diegeilstegruppe.sasha.audio.SpeechRecorder;
+import com.diegeilstegruppe.sasha.audio.WavAudioRecorder;
 import com.diegeilstegruppe.sasha.network.Communicator;
 import com.squareup.otto.Subscribe;
 
 import java.io.File;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by denys on 20/05/2017.
@@ -64,7 +63,7 @@ public class NotificationService extends NotificationListenerService {
                 String title = extras.getCharSequence("android.title").toString();
                 // Log.d(TAG, title);
                 // Log.d(TAG, text);
-                this.speech.sayNewMessage("Hangout", title);
+                this.speech.sayNewMessage("Hangout", title + " ");
             }
         }
     }
@@ -76,19 +75,46 @@ public class NotificationService extends NotificationListenerService {
 
     @Subscribe
     public void NewMessageNotifiedEvent(NewMessageNotifiedEvent newMessageNotifiedEvent) {
-        SpeechRecorder recorder = new SpeechRecorder(this);
-        recorder.startRecording();
+
+        final String mFileName =  getCacheDir().getAbsolutePath() + "/audio.wav";
+        WavAudioRecorder meinWavRecorder = WavAudioRecorder.getInstanse();
+        meinWavRecorder.setOutputFile(mFileName);
+        meinWavRecorder.prepare();
+        meinWavRecorder.start();
+
+        Log.d(TAG, "Start thread");
+        Thread thread = new Thread(new BackgroundCounter());
+        thread.start();
         try {
-            TimeUnit.SECONDS.sleep(2);
+            thread.join();
+
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        recorder.stopRecording();
-        String fileName = SpeechRecorder.getFileName();
-        communicator = new Communicator();
-        communicator.uploadFile(new File(fileName));
+        Log.d(TAG, "join thread");
 
-        Log.d(TAG, "NewFile " + fileName);
+        meinWavRecorder.stop();
+        meinWavRecorder.reset();
+
+        communicator = new Communicator();
+        communicator.uploadFile(new File(mFileName));
+        Log.d(TAG, "NewFile " + mFileName);
         Log.d(TAG, "NewMessageNotifiedEvent: " + newMessageNotifiedEvent.getMessage());
     }
+
+    protected class BackgroundCounter implements Runnable   {
+        public void run(){
+
+            try {
+                Log.d(TAG, "Start sleep");
+                Thread.sleep(10000);
+                Log.d(TAG, "Stop sleep");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+    }
+
 }

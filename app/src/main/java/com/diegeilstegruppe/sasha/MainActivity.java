@@ -2,6 +2,7 @@ package com.diegeilstegruppe.sasha;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -13,8 +14,11 @@ import android.widget.TextView;
 
 import com.diegeilstegruppe.sasha.audio.Speech;
 import com.diegeilstegruppe.sasha.audio.SpeechRecorder;
+import com.diegeilstegruppe.sasha.audio.WavAudioRecorder;
 import com.diegeilstegruppe.sasha.network.Communicator;
 import com.diegeilstegruppe.sasha.service.BusProvider;
+
+import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -31,10 +35,22 @@ public class MainActivity extends AppCompatActivity {
 
     private SpeechRecorder speechRecorder;
     private Speech speech;
+    private WavAudioRecorder wavAudioRecorder;
+    private MediaPlayer mediaPlayer;
+    private Communicator communicator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+
+        //File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        //final String mFileName = new File(path, "audio.wav").getAbsolutePath();
+
+        //Boolean result = new File(path, "audio.wav").exists();
+        //Log.d("", result.toString());
+        final String mFileName =  getCacheDir().getAbsolutePath() + "/audio.wav";
+        wavAudioRecorder = WavAudioRecorder.getInstanse();
+        wavAudioRecorder.setOutputFile(mFileName);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         final TextView text = (TextView) findViewById(R.id.textView);
@@ -45,8 +61,26 @@ public class MainActivity extends AppCompatActivity {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
                     text.setText("Recording");
+                    wavAudioRecorder.prepare();
+                    wavAudioRecorder.start();
                 } else {
                     text.setText("Not recording");
+                    wavAudioRecorder.stop();
+                    wavAudioRecorder.reset();
+                    try{
+                        mediaPlayer = new MediaPlayer();
+                        mediaPlayer.setDataSource(mFileName);
+                        mediaPlayer.prepare();
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                    mediaPlayer.start();
+
+                    communicator = new Communicator();
+
+                    File file = new File(mFileName);
+                    communicator.uploadFile(file);
+
                 }
             }
         });
@@ -57,6 +91,7 @@ public class MainActivity extends AppCompatActivity {
 
         speechRecorder = new SpeechRecorder(this);
         speech = new Speech(this);
+
     }
 
     @Override
