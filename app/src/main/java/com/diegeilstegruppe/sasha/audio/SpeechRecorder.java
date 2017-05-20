@@ -41,7 +41,7 @@ public class SpeechRecorder {
             Log.e(LOG_TAG, "prepare() failed");
         }
 
-        mRecorder.prepare();
+        //mRecorder.prepare();
         mRecorder.start();
     }
 

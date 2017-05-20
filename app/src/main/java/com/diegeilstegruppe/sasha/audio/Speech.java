@@ -7,6 +7,7 @@ import android.os.Looper;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.diegeilstegruppe.sasha.service.BusProvider;
 import com.diegeilstegruppe.sasha.service.NewMessageNotifiedEvent;
@@ -20,40 +21,18 @@ import static android.content.Context.MODE_PRIVATE;
  * Created by denys on 20/05/2017.
  */
 
-public class Speech {
+public class Speech implements TextToSpeech.OnInitListener {
 
     TextToSpeech textToSpeech;
+    private Context ctx;
     public final static String TAG = "Speech";
 
     // TODO: use android string resource
     private final static String NEW_MESSAGE_TEXT = "Du hast eine neue %s Nachricht von %s! Soll ich sie dir vorlesen?";
 
     public Speech(Context context) {
-
-        textToSpeech = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int status) {
-                if (status != TextToSpeech.ERROR) {
-                    textToSpeech.setLanguage(Locale.GERMAN);
-                    textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
-                        @Override
-                        public void onStart(String utteranceId) {
-
-                        }
-
-                        @Override
-                        public void onDone(String utteranceId) {
-                            speakDone();
-                        }
-
-                        @Override
-                        public void onError(String utteranceId) {
-
-                        }
-                    });
-                }
-            }
-        });
+            ctx = context;
+            textToSpeech = new TextToSpeech(context, this);
     }
 
     protected void speakDone()  {
@@ -93,5 +72,16 @@ public class Speech {
     @Produce
     public NewMessageNotifiedEvent produceNewMessageNotifiedEvent(String message) {
         return new NewMessageNotifiedEvent(message);
+    }
+
+    @Override
+    public void onInit(int status) {
+        if (status == TextToSpeech.SUCCESS) {
+            if(textToSpeech.isLanguageAvailable(Locale.US)==TextToSpeech.LANG_AVAILABLE)
+                textToSpeech.setLanguage(Locale.US);
+        }
+        else if (status == TextToSpeech.ERROR) {
+            Toast.makeText(ctx, "Sorry! Text To Speech failed...", Toast.LENGTH_LONG).show();
+        }
     }
 }

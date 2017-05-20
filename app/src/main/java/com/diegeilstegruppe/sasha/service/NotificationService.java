@@ -9,7 +9,10 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.diegeilstegruppe.sasha.audio.Speech;
+import com.diegeilstegruppe.sasha.audio.SpeechRecorder;
 import com.squareup.otto.Subscribe;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by denys on 20/05/2017.
@@ -70,6 +73,14 @@ public class NotificationService extends NotificationListenerService {
 
     @Subscribe
     public void NewMessageNotifiedEvent(NewMessageNotifiedEvent newMessageNotifiedEvent) {
+//        SpeechRecorder recorder = new SpeechRecorder(this);
+//        recorder.startRecording();
+//        try {
+//            TimeUnit.SECONDS.sleep(2);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//        recorder.stopRecording();
         Log.d(TAG, "NewMessageNotifiedEvent: " + newMessageNotifiedEvent.getMessage());
     }
 }
