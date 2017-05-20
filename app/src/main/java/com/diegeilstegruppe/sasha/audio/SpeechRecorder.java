@@ -17,7 +17,7 @@ public class SpeechRecorder {
 
     private static String mFileName = null;
 
-    private MediaRecorder mRecorder = null;
+    private WavAudioRecorder mRecorder = null;
     private MediaPlayer mPlayer = null;
 
     public static String getFileName() {
@@ -31,17 +31,17 @@ public class SpeechRecorder {
     }
 
     public void startRecording() {
-        mRecorder = new MediaRecorder();
-        mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        mRecorder.setOutputFormat(MediaRecorder.OutputFormat.RAW_AMR);
+        //int audioSource, int sampleRate, int channelConfig, int audioFormat
+        mRecorder = WavAudioRecorder.getInstanse();
         mRecorder.setOutputFile(mFileName);
 
         try {
             mRecorder.prepare();
-        } catch (IOException e) {
+        } catch (Exception e) {
             Log.e(LOG_TAG, "prepare() failed");
         }
 
+        mRecorder.prepare();
         mRecorder.start();
     }
 

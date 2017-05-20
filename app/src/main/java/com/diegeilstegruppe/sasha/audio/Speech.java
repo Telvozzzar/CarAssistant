@@ -3,6 +3,8 @@ package com.diegeilstegruppe.sasha.audio;
 import android.content.Context;
 import android.os.Build;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
+import android.util.Log;
 
 import java.util.Locale;
 
@@ -15,6 +17,7 @@ import static android.content.Context.MODE_PRIVATE;
 public class Speech {
 
     TextToSpeech textToSpeech;
+    public final static String TAG = "Speech";
 
     // TODO: use android string resource
     private final static String NEW_MESSAGE_TEXT = "Du hast eine neue %s Nachricht von %s! Soll ich sie dir vorlesen?";
@@ -26,9 +29,30 @@ public class Speech {
             public void onInit(int status) {
                 if (status != TextToSpeech.ERROR) {
                     textToSpeech.setLanguage(Locale.GERMAN);
+                    textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+                        @Override
+                        public void onStart(String utteranceId) {
+
+                        }
+
+                        @Override
+                        public void onDone(String utteranceId) {
+                            speakDone();
+
+                        }
+
+                        @Override
+                        public void onError(String utteranceId) {
+
+                        }
+                    });
                 }
             }
         });
+    }
+
+    protected void speakDone()  {
+        Log.d(TAG, "Speak Done");
     }
 
     protected void speak(String text) {
