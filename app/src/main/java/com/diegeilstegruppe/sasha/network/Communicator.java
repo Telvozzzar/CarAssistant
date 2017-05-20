@@ -101,16 +101,17 @@ public class Communicator {
         // create upload service client
         Interface service = retrofit.create(Interface.class);
 
-
-
-
-
         // finally, execute the request
         Call<ServerResponse> call = service.post("audio/wave",file);
         call.enqueue(new Callback<ServerResponse>() {
             @Override
             public void onResponse(Call<ServerResponse> call,
                                    Response<ServerResponse> response) {
+                String text = response.body().getText();
+                if (shouldReadTheMessage(text)) {
+                    //TODO: readMessage
+                }
+
                 Log.v("Upload", "success");
             }
 
@@ -119,5 +120,9 @@ public class Communicator {
                 Log.e("Upload error:", t.getMessage());
             }
         });
+    }
+
+    private boolean shouldReadTheMessage(final String answer) {
+        return answer == "Ja";
     }
 }
