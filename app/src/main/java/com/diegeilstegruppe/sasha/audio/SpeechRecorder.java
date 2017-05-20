@@ -20,6 +20,10 @@ public class SpeechRecorder {
     private MediaRecorder mRecorder = null;
     private MediaPlayer mPlayer = null;
 
+    public static String getFileName() {
+        return mFileName;
+    }
+
     public SpeechRecorder(Context context) {
 
         mFileName = context.getCacheDir().getAbsolutePath();
@@ -29,9 +33,8 @@ public class SpeechRecorder {
     public void startRecording() {
         mRecorder = new MediaRecorder();
         mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        mRecorder.setOutputFormat(MediaRecorder.OutputFormat.RAW_AMR);
         mRecorder.setOutputFile(mFileName);
-        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 
         try {
             mRecorder.prepare();

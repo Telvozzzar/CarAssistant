@@ -10,9 +10,13 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import java.io.*;
 
 import com.diegeilstegruppe.sasha.audio.SpeechRecorder;
 import com.diegeilstegruppe.sasha.network.Communicator;
+
+import java.io.File;
+import java.net.URI;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -51,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(View v) {
                         Log.d(TAG, "click");
 
-                        communicator.send("Hi");
+                        communicator.send("baaaasinga");
                     }
                 }
         );
@@ -74,6 +78,9 @@ public class MainActivity extends AppCompatActivity {
                     case MotionEvent.ACTION_UP:
                         Log.d(TAG, "released");
                         speechRecorder.stopAndPlayRecording();
+                        String path = speechRecorder.getFileName();
+
+                        communicator.uploadFile(getFile(path));
                         return true; // if you want to handle the touch event
                 }
                 return false;
@@ -81,10 +88,14 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
+    private File getFile(String path) {
+        File toReturn = new File(path);
+        return toReturn;
+    }
 
+    @Override
+    public void onStop(){
+        super.onStop();
         if (speechRecorder != null) {
             speechRecorder.onActivityStop();
         }
