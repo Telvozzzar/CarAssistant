@@ -1,12 +1,15 @@
 package com.diegeilstegruppe.sasha.service;
 
 import android.app.Notification;
+import android.content.Intent;
 import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.diegeilstegruppe.sasha.audio.Speech;
+import com.squareup.otto.Subscribe;
 
 /**
  * Created by denys on 20/05/2017.
@@ -22,18 +25,26 @@ public class NotificationService extends NotificationListenerService {
     public void onCreate() {
         super.onCreate();
         speech = new Speech(getApplicationContext());
+        Log.d(TAG, "NotificationListenerService onCreate");
+        BusProvider.getInstance().register(this);
+    }
+
+    @Override
+    public void onRebind(Intent intent) {
+        super.onRebind(intent);
+        Log.d(TAG, "NotificationListenerService onRebird");
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         this.speech.onDestroy();
+        BusProvider.getInstance().unregister(this);
     }
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
         final String packageName = sbn.getPackageName();
-
         // TODO: add another packages... facebook, whatsapp, etc.
         if (!TextUtils.isEmpty(packageName) && packageName.equals("com.google.android.talk")) {
 
@@ -48,7 +59,6 @@ public class NotificationService extends NotificationListenerService {
                 // Log.d(TAG, title);
                 // Log.d(TAG, text);
                 this.speech.sayNewMessage("Hangout", title);
-
             }
         }
     }
@@ -56,5 +66,10 @@ public class NotificationService extends NotificationListenerService {
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn) {
         // Nothing to do
+    }
+
+    @Subscribe
+    public void NewMessageNotifiedEvent(NewMessageNotifiedEvent newMessageNotifiedEvent) {
+        Log.d(TAG, "NewMessageNotifiedEvent: " + newMessageNotifiedEvent.getMessage());
     }
 }

@@ -2,9 +2,15 @@ package com.diegeilstegruppe.sasha.audio;
 
 import android.content.Context;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.util.Log;
+
+import com.diegeilstegruppe.sasha.service.BusProvider;
+import com.diegeilstegruppe.sasha.service.NewMessageNotifiedEvent;
+import com.squareup.otto.Produce;
 
 import java.util.Locale;
 
@@ -38,7 +44,6 @@ public class Speech {
                         @Override
                         public void onDone(String utteranceId) {
                             speakDone();
-
                         }
 
                         @Override
@@ -53,11 +58,21 @@ public class Speech {
 
     protected void speakDone()  {
         Log.d(TAG, "Speak Done");
+        // TODO: we need message
+        // BusProvider.getInstance().post(new NewMessageNotifiedEvent("test123123123"));
+
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                BusProvider.getInstance().post(new NewMessageNotifiedEvent("test123123123"));
+            }
+        });
     }
 
     protected void speak(String text) {
         if (Build.VERSION.SDK_INT >= 21) {
-            textToSpeech.speak(text, MODE_PRIVATE, null, null);
+            Log.i(TAG, "speak; " + text );
+            textToSpeech.speak(text, MODE_PRIVATE, null, "messageID");
         } else {
             textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null);
         }
@@ -73,5 +88,10 @@ public class Speech {
             textToSpeech.stop();
             textToSpeech.shutdown();
         }
+    }
+
+    @Produce
+    public NewMessageNotifiedEvent produceNewMessageNotifiedEvent(String message) {
+        return new NewMessageNotifiedEvent(message);
     }
 }
