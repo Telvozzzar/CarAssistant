@@ -106,7 +106,7 @@ public class Communicator {
 
 
         // finally, execute the request
-        Call<ServerResponse> call = service.post("audio/wav;e",file);
+        Call<ServerResponse> call = service.post("audio/wave",file);
         call.enqueue(new Callback<ServerResponse>() {
             @Override
             public void onResponse(Call<ServerResponse> call,

@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean permissionToRecordAccepted = false;
     private String[] permissions = {Manifest.permission.RECORD_AUDIO};
 
-    private Communicator communicator;
+
     private SpeechRecorder speechRecorder;
     private Speech speech;
 
@@ -55,7 +55,6 @@ public class MainActivity extends AppCompatActivity {
 
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
 
-        communicator = new Communicator();
         speechRecorder = new SpeechRecorder(this);
         speech = new Speech(this);
     }

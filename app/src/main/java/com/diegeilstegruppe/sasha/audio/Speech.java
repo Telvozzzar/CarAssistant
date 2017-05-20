@@ -63,6 +63,7 @@ public class Speech implements TextToSpeech.OnInitListener {
     }
 
     public void onDestroy() {
+        Log.d(TAG, "TTS Shutdown");
         if (textToSpeech != null) {
             textToSpeech.stop();
             textToSpeech.shutdown();
@@ -79,6 +80,22 @@ public class Speech implements TextToSpeech.OnInitListener {
         if (status == TextToSpeech.SUCCESS) {
             if(textToSpeech.isLanguageAvailable(Locale.US)==TextToSpeech.LANG_AVAILABLE)
                 textToSpeech.setLanguage(Locale.US);
+            textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+                         @Override
+                         public void onStart(String utteranceId) {
+
+                         }
+
+                         @Override
+                         public void onDone(String utteranceId) {
+                             speakDone();
+                         }
+
+                        @Override
+                         public void onError(String utteranceId) {
+
+                         }
+                     });
         }
         else if (status == TextToSpeech.ERROR) {
             Toast.makeText(ctx, "Sorry! Text To Speech failed...", Toast.LENGTH_LONG).show();

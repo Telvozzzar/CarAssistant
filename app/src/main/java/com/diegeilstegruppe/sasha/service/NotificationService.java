@@ -10,8 +10,10 @@ import android.util.Log;
 
 import com.diegeilstegruppe.sasha.audio.Speech;
 import com.diegeilstegruppe.sasha.audio.SpeechRecorder;
+import com.diegeilstegruppe.sasha.network.Communicator;
 import com.squareup.otto.Subscribe;
 
+import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -23,6 +25,7 @@ public class NotificationService extends NotificationListenerService {
     public static final String TAG = "NotificationService";
 
     private Speech speech;
+    private Communicator communicator;
 
     @Override
     public void onCreate() {
@@ -73,14 +76,19 @@ public class NotificationService extends NotificationListenerService {
 
     @Subscribe
     public void NewMessageNotifiedEvent(NewMessageNotifiedEvent newMessageNotifiedEvent) {
-//        SpeechRecorder recorder = new SpeechRecorder(this);
-//        recorder.startRecording();
-//        try {
-//            TimeUnit.SECONDS.sleep(2);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//        recorder.stopRecording();
+        SpeechRecorder recorder = new SpeechRecorder(this);
+        recorder.startRecording();
+        try {
+            TimeUnit.SECONDS.sleep(2);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        recorder.stopRecording();
+        String fileName = SpeechRecorder.getFileName();
+        communicator = new Communicator();
+        communicator.uploadFile(new File(fileName));
+
+        Log.d(TAG, "NewFile " + fileName);
         Log.d(TAG, "NewMessageNotifiedEvent: " + newMessageNotifiedEvent.getMessage());
     }
 }
