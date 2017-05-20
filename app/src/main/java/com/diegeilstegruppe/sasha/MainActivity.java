@@ -61,10 +61,38 @@ public class MainActivity extends AppCompatActivity {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
                     text.setText("Recording");
+//                    wavAudioRecorder.prepare();
+//                    wavAudioRecorder.start();
+                } else {
+                    text.setText("Not recording");
+//                    wavAudioRecorder.stop();
+//                    wavAudioRecorder.reset();
+//                    try{
+//                        mediaPlayer = new MediaPlayer();
+//                        mediaPlayer.setDataSource(mFileName);
+//                        mediaPlayer.prepare();
+//                    }catch (Exception e){
+//                        e.printStackTrace();
+//                    }
+//                    mediaPlayer.start();
+//
+//                    communicator = new Communicator();
+//
+//                    File file = new File(mFileName);
+//                    communicator.uploadFile(file);
+
+                }
+            }
+        });
+
+        final Switch switch_demo = (Switch) findViewById(R.id.switch_demo);
+        switch_demo.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
                     wavAudioRecorder.prepare();
                     wavAudioRecorder.start();
                 } else {
-                    text.setText("Not recording");
                     wavAudioRecorder.stop();
                     wavAudioRecorder.reset();
                     try{

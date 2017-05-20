@@ -51,6 +51,14 @@
             android:layout_marginBottom="94dp"
             android:text="Press me!" />
 
+        <Switch
+            android:id="@+id/switch_demo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/progressBar"
+            android:text="Wit.ai Demo" />
+
     </RelativeLayout>
 
 </android.support.constraint.ConstraintLayout>
