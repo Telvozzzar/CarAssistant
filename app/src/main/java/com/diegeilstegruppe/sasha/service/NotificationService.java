@@ -48,6 +48,7 @@ public class NotificationService extends NotificationListenerService {
                 // Log.d(TAG, title);
                 // Log.d(TAG, text);
                 this.speech.sayNewMessage("Hangout", title);
+
             }
         }
     }
