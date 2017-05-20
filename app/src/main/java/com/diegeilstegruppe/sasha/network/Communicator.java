@@ -1,14 +1,23 @@
 package com.diegeilstegruppe.sasha.network;
 
+import android.net.Uri;
 import android.util.Log;
 
+import java.io.File;
+
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+
+import static android.R.attr.description;
 
 /**
  * Created by denys on 19/05/2017.
@@ -37,7 +46,7 @@ public class Communicator {
         httpClient.addInterceptor(logging);
 
         //The Retrofit builder will have the client attached, in order to get connection logs
-        Retrofit retrofit = new Retrofit.Builder()
+        retrofit = new Retrofit.Builder()
                 .client(httpClient.build())
                 .addConverterFactory(GsonConverterFactory.create())
                 .baseUrl(API_URL)
@@ -46,9 +55,10 @@ public class Communicator {
         service = retrofit.create(Interface.class);
     }
 
-    public void send(String query) {
+    private Retrofit retrofit;
 
-        Call<ServerResponse> call = service.get(query, Communicator.API_VER);
+/*    public void post(File file) {
+        Call<ServerResponse> call = service.post(file, "Audio", Communicator.API_VER);
 
         call.enqueue(new Callback<ServerResponse>() {
             @Override
@@ -62,6 +72,51 @@ public class Communicator {
                 // handle execution failures like no internet connectivity
                 // BusProvider.getInstance().post(new ErrorEvent(-2,t.getMessage()));
                 Log.e(TAG,"Failure");
+            }
+        });
+    }*/
+
+    public void send(String query) {
+
+        Call<ServerResponse> call = service.get(query, Communicator.API_VER);
+
+        call.enqueue(new Callback<ServerResponse>() {
+            @Override
+            public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
+                // BusProvider.getInstance().post(new ServerEvent(response.body()));
+                Log.e(TAG, "Success");
+            }
+
+            @Override
+            public void onFailure(Call<ServerResponse> call, Throwable t) {
+                // handle execution failures like no internet connectivity
+                // BusProvider.getInstance().post(new ErrorEvent(-2,t.getMessage()));
+                Log.e(TAG, "Failure");
+            }
+        });
+    }
+
+
+    public void uploadFile(File file) {
+        // create upload service client
+        Interface service = retrofit.create(Interface.class);
+
+
+
+
+
+        // finally, execute the request
+        Call<ServerResponse> call = service.post("audio/wav;e",file);
+        call.enqueue(new Callback<ServerResponse>() {
+            @Override
+            public void onResponse(Call<ServerResponse> call,
+                                   Response<ServerResponse> response) {
+                Log.v("Upload", "success");
+            }
+
+            @Override
+            public void onFailure(Call<ServerResponse> call, Throwable t) {
+                Log.e("Upload error:", t.getMessage());
             }
         });
     }
