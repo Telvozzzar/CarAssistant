@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private SpeechRecorder speechRecorder;
 
     TextToSpeech t1;
+    CharSequence newMessageReceivedText = "Du hast eine neue Nachricht! Soll ich sie dir vorlesen?";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,16 +119,27 @@ public class MainActivity extends AppCompatActivity {
 //    }
 
     protected void tts(String text){
+        boolean read = true;
         if (Build.VERSION.SDK_INT >= 21){
-            t1.speak((CharSequence) text, MODE_PRIVATE, null, null);
+            t1.speak(newMessageReceivedText, MODE_PRIVATE, null, null);
+            //HIER DAS ZUHÖREN AUF JA ODER NEIN und in read Variable
+            if(read){
+                t1.speak((CharSequence) text, MODE_PRIVATE, null, null);
+            }
 
-        } else {
-            t1.speak(text, TextToSpeech.QUEUE_FLUSH, null);
+
+        }else{
+            t1.speak((String) newMessageReceivedText, TextToSpeech.QUEUE_FLUSH, null);
+            //HIER DAS ZUHÖREN AUF JA ODER NEIN und in read Variable
+            if(read){
+                t1.speak(text, TextToSpeech.QUEUE_FLUSH, null);
+            }
+
         }
     }
 
     public void onPause(){
-        if (t1 != null) {
+        if(t1 !=null){
             t1.stop();
             t1.shutdown();
         }
