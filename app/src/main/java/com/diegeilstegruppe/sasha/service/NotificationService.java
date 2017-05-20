@@ -2,6 +2,7 @@ package com.diegeilstegruppe.sasha.service;
 
 import android.app.Notification;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
@@ -64,7 +65,7 @@ public class NotificationService extends NotificationListenerService {
                 String title = extras.getCharSequence("android.title").toString();
                 // Log.d(TAG, title);
                 // Log.d(TAG, text);
-                this.speech.sayNewMessage("Hangout", title);
+                this.speech.sayNewMessage("Hangout", title + " ");
             }
         }
     }
@@ -78,17 +79,49 @@ public class NotificationService extends NotificationListenerService {
     public void NewMessageNotifiedEvent(NewMessageNotifiedEvent newMessageNotifiedEvent) {
         SpeechRecorder recorder = new SpeechRecorder(this);
         recorder.startRecording();
+        Log.d(TAG, "Start thread");
+        Thread thread = new Thread(new BackgroundCounter());
+        thread.start();
         try {
-            TimeUnit.SECONDS.sleep(2);
+            thread.join();
+
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        Log.d(TAG, "join thread");
         recorder.stopRecording();
         String fileName = SpeechRecorder.getFileName();
         communicator = new Communicator();
         communicator.uploadFile(new File(fileName));
+        MediaPlayer mediaPlayer = null;
+        try{
 
+             mediaPlayer = new MediaPlayer();
+            mediaPlayer.setDataSource(fileName);
+            mediaPlayer.prepare();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        mediaPlayer.start();
+        Log.d(TAG, "" + mediaPlayer.isPlaying());
         Log.d(TAG, "NewFile " + fileName);
         Log.d(TAG, "NewMessageNotifiedEvent: " + newMessageNotifiedEvent.getMessage());
     }
+
+    protected class BackgroundCounter implements Runnable   {
+        public void run(){
+            Thread thread = Thread.currentThread();
+
+            try {
+                Log.d(TAG, "Start sleep");
+                Thread.sleep(10000);
+                Log.d(TAG, "Stop sleep");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+    }
+
 }
