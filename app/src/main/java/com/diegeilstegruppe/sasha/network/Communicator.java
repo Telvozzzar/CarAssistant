@@ -1,9 +1,14 @@
 package com.diegeilstegruppe.sasha.network;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
-import java.io.File;
+import com.diegeilstegruppe.sasha.service.BusProvider;
+import com.diegeilstegruppe.sasha.service.NewMessageNotifiedEvent;
+import com.squareup.otto.Produce;
 
+import java.io.File;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
@@ -52,25 +57,6 @@ public class Communicator {
 
     private Retrofit retrofit;
 
-/*    public void post(File file) {
-        Call<ServerResponse> call = service.post(file, "Audio", Communicator.API_VER);
-
-        call.enqueue(new Callback<ServerResponse>() {
-            @Override
-            public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
-                // BusProvider.getInstance().post(new ServerEvent(response.body()));
-                Log.e(TAG,"Success");
-            }
-
-            @Override
-            public void onFailure(Call<ServerResponse> call, Throwable t) {
-                // handle execution failures like no internet connectivity
-                // BusProvider.getInstance().post(new ErrorEvent(-2,t.getMessage()));
-                Log.e(TAG,"Failure");
-            }
-        });
-    }*/
-
     public void send(String query) {
 
         Call<ServerResponse> call = service.get(query, Communicator.API_VER);
@@ -101,12 +87,14 @@ public class Communicator {
         call.enqueue(new Callback<ServerResponse>() {
             @Override
             public void onResponse(Call<ServerResponse> call,
-                                   Response<ServerResponse> response) {
-                String text = response.body().getText();
-                if (shouldReadTheMessage(text)) {
-                    //TODO: readMessage
-                }
-
+                                   final Response<ServerResponse> response) {
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        //Log.v("aaa", "bbb");
+                        BusProvider.getInstance().post(new ResponseEvent(response.body()));
+                    }
+                });
                 Log.v("Upload", "success");
             }
 
@@ -117,7 +105,8 @@ public class Communicator {
         });
     }
 
-    private boolean shouldReadTheMessage(final String answer) {
-        return answer == "Ja";
+    @Produce
+    public ResponseEvent produceResponseEvent(ServerResponse serverResponse) {
+        return new ResponseEvent(serverResponse);
     }
 }

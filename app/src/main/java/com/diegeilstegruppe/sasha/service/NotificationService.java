@@ -11,6 +11,7 @@ import android.util.Log;
 import com.diegeilstegruppe.sasha.audio.Speech;
 import com.diegeilstegruppe.sasha.audio.WavAudioRecorder;
 import com.diegeilstegruppe.sasha.network.Communicator;
+import com.diegeilstegruppe.sasha.network.ServerResponse;
 import com.squareup.otto.Subscribe;
 
 import java.io.File;
@@ -27,6 +28,7 @@ public class NotificationService extends NotificationListenerService {
 
     private Speech speech;
     private Communicator communicator;
+    private String message;
 
     @Override
     public void onCreate() {
@@ -62,6 +64,7 @@ public class NotificationService extends NotificationListenerService {
             if (notification.category != null
                     && notification.category.equals(Notification.CATEGORY_MESSAGE)) {
                 String text = extras.getCharSequence("android.text").toString();
+                this.message = text;
                 String title = extras.getCharSequence("android.title").toString();
                 // Log.d(TAG, title);
                 // Log.d(TAG, text);
@@ -97,5 +100,14 @@ public class NotificationService extends NotificationListenerService {
                 communicator.uploadFile(new File(mFileName));
             }
         }, 5000);
+    }
+
+    @Subscribe
+    public void ResponseEvent(ServerResponse serverResponse) {
+        Log.d(TAG, "ResponseEvent");
+    }
+
+    public void readMessage(final String message) {
+        this.speech.readNewMessage(message);
     }
 }
