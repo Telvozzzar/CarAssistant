@@ -1,22 +1,23 @@
 package com.diegeilstegruppe.sasha;
 
+import android.os.Build;
+import android.speech.tts.TextToSpeech;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.util.Log;
+import android.widget.CompoundButton;
+import android.widget.Switch;
+import android.widget.TextView;
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.MotionEvent;
-import android.view.View;
-import android.widget.Button;
-import java.io.*;
 
 import com.diegeilstegruppe.sasha.audio.SpeechRecorder;
 import com.diegeilstegruppe.sasha.network.Communicator;
 
-import java.io.File;
-import java.net.URI;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,11 +34,36 @@ public class MainActivity extends AppCompatActivity {
     private Communicator communicator;
     private SpeechRecorder speechRecorder;
 
+    TextToSpeech t1;
+    CharSequence newMessageReceivedText = "Du hast eine neue Nachricht! Soll ich sie dir vorlesen?";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        final TextView text = (TextView) findViewById(R.id.textView);
+
+        t1 = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if(status != TextToSpeech.ERROR) {
+                    t1.setLanguage(Locale.GERMAN);
+                }
+            }
+        });
+
+        final Switch switch_activated = (Switch) findViewById(R.id.switch_activated);
+        switch_activated.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked) {
+                    text.setText("Recording");
+                } else {
+                    text.setText("Not recording");
+                }
+            }
+        });
 
         Log.d(TAG, "onCreate");
 
@@ -45,57 +71,12 @@ public class MainActivity extends AppCompatActivity {
 
         communicator = new Communicator();
         speechRecorder = new SpeechRecorder(this);
-
-        Button button = (Button) findViewById(R.id.button);
-        Button button2 = (Button) findViewById(R.id.button2);
-
-        button.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Log.d(TAG, "click");
-
-                        communicator.send("baaaasinga");
-                    }
-                }
-        );
-
-//        button2.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                displaySpeechRecognizer();
-//            }
-//        });
-
-        button2.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch(event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        Log.d(TAG, "pressed");
-                        speechRecorder.startRecording();
-                        return true; // if you want to handle the touch event
-                    case MotionEvent.ACTION_UP:
-                        Log.d(TAG, "released");
-                        speechRecorder.stopAndPlayRecording();
-                        String path = speechRecorder.getFileName();
-
-                        communicator.uploadFile(getFile(path));
-                        return true; // if you want to handle the touch event
-                }
-                return false;
-            }
-        });
-    }
-
-    private File getFile(String path) {
-        File toReturn = new File(path);
-        return toReturn;
     }
 
     @Override
-    public void onStop(){
+    protected void onStop() {
         super.onStop();
+
         if (speechRecorder != null) {
             speechRecorder.onActivityStop();
         }
@@ -136,4 +117,32 @@ public class MainActivity extends AppCompatActivity {
 //        }
 //        super.onActivityResult(requestCode, resultCode, data);
 //    }
+
+    protected void tts(String text){
+        boolean read = true;
+        if (Build.VERSION.SDK_INT >= 21){
+            t1.speak(newMessageReceivedText, MODE_PRIVATE, null, null);
+            //HIER DAS ZUHÖREN AUF JA ODER NEIN und in read Variable
+            if(read){
+                t1.speak((CharSequence) text, MODE_PRIVATE, null, null);
+            }
+
+
+        }else{
+            t1.speak((String) newMessageReceivedText, TextToSpeech.QUEUE_FLUSH, null);
+            //HIER DAS ZUHÖREN AUF JA ODER NEIN und in read Variable
+            if(read){
+                t1.speak(text, TextToSpeech.QUEUE_FLUSH, null);
+            }
+
+        }
+    }
+
+    public void onPause(){
+        if(t1 !=null){
+            t1.stop();
+            t1.shutdown();
+        }
+        super.onPause();
+    }
 }
