@@ -62,6 +62,10 @@ public class Speech implements TextToSpeech.OnInitListener {
         this.speak(string);
     }
 
+    public void readNewMessage(final String message) {
+        this.speak(message);
+    }
+
     public void onDestroy() {
         Log.d(TAG, "TTS Shutdown");
         if (textToSpeech != null) {
