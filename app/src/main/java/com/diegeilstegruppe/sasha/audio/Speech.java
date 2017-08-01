@@ -9,8 +9,8 @@ import android.speech.tts.UtteranceProgressListener;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.diegeilstegruppe.sasha.service.BusProvider;
-import com.diegeilstegruppe.sasha.service.NewMessageNotifiedEvent;
+import com.diegeilstegruppe.sasha.service.Notifications.BusProvider;
+import com.diegeilstegruppe.sasha.service.Notifications.NewMessageNotifiedEvent;
 import com.squareup.otto.Produce;
 
 import java.util.Locale;

@@ -4,8 +4,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
-import com.diegeilstegruppe.sasha.service.BusProvider;
-import com.diegeilstegruppe.sasha.service.NewMessageNotifiedEvent;
+import com.diegeilstegruppe.sasha.service.Notifications.BusProvider;
 import com.squareup.otto.Produce;
 
 import java.io.File;

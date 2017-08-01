@@ -1,4 +1,4 @@
-package com.diegeilstegruppe.sasha.service;
+package com.diegeilstegruppe.sasha.service.Notifications;
 
 import android.app.Notification;
 import android.content.Intent;
