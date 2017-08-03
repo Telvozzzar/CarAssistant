@@ -19,6 +19,10 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
+                <data
+                    android:host="callback"
+                    android:scheme="yourcustomprotocol" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -34,7 +38,7 @@
             </intent-filter>
         </service>
 
-        <activity android:name=".service.Spotify.SpotifyLogin"></activity>
+        <activity android:name=".service.Spotify.spotifyController"></activity>
     </application>
 
 </manifest>

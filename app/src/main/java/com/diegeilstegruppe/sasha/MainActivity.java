@@ -6,21 +6,14 @@ import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.widget.CompoundButton;
-import android.widget.Switch;
-import android.widget.TextView;
 
 import com.diegeilstegruppe.sasha.audio.Speech;
 import com.diegeilstegruppe.sasha.audio.SpeechRecorder;
 import com.diegeilstegruppe.sasha.audio.WavAudioRecorder;
 import com.diegeilstegruppe.sasha.network.Communicator;
 import com.diegeilstegruppe.sasha.service.Notifications.BusProvider;
-import com.diegeilstegruppe.sasha.service.Spotify.SpotifyLogin;
-
-import java.io.File;
+import com.diegeilstegruppe.sasha.service.Spotify.spotifyController;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -98,8 +91,9 @@ public class MainActivity extends AppCompatActivity {
         speechRecorder = new SpeechRecorder(this);
         speech = new Speech(this);
 */
-        Intent intent = new Intent(this, SpotifyLogin.class);
+        Intent intent = new Intent(this, spotifyController.class);
         startActivity(intent);
+
 
 
     }
