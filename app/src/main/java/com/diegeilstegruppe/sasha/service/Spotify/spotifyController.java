@@ -28,22 +28,30 @@ public class spotifyController extends Activity implements
         private static final String REDIRECT_URI = "yourcustomprotocol://callback";
     private static final int REQUEST_CODE = 1337;
 
-    private  Player mPlayer;
+    private static  Player mPlayer;
 
-        @Override
-        protected void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            setContentView(R.layout.activity_main);
-
-            AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID,
-                    AuthenticationResponse.Type.TOKEN,
-                    REDIRECT_URI);
-            builder.setScopes(new String[]{"user-read-private", "streaming"});
-            AuthenticationRequest request = builder.build();
-
-            AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
+    public static Player getPlayer(){
+        if (mPlayer == null){
+            throw  new RuntimeException("Player not yet initialized!");
+        }
+        else{
+            return mPlayer;
+        }
     }
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_spotifycontroller);
+
+        AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID,
+                AuthenticationResponse.Type.TOKEN,
+                REDIRECT_URI);
+        builder.setScopes(new String[]{"user-read-private", "streaming"});
+        AuthenticationRequest request = builder.build();
+
+        AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
+    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
@@ -66,6 +74,7 @@ public class spotifyController extends Activity implements
                         Log.e("MainActivity", "Could not initialize player: " + throwable.getMessage());
                     }
                 });
+                SpotifyPlayerReference.accessToken = response.getAccessToken();
             }
         }
     }
@@ -75,8 +84,8 @@ public class spotifyController extends Activity implements
         super.onDestroy();
     }
 
-        @Override
-        public void onPlaybackEvent(PlayerEvent playerEvent) {
+    @Override
+    public void onPlaybackEvent(PlayerEvent playerEvent) {
         Log.d("MainActivity", "Playback event received: " + playerEvent.name());
         switch (playerEvent) {
             // Handle event type as necessary
@@ -99,12 +108,15 @@ public class spotifyController extends Activity implements
     @Override
     public void onLoggedIn() {
         Log.d("MainActivity", "User logged in");
-
-        mPlayer.playUri(null, "spotify:track:2TpxZ7JUBn3uw46aR7qd6V", 0, 0);
+        SpotifyPlayerReference.player = mPlayer;
+        finish();
+        //Intent i = new Intent(spotifyController.this, MainActivity.class);
+        //startActivity(i);
+        //mPlayer.playUri(null, "spotify:track:2TpxZ7JUBn3uw46aR7qd6V", 0, 0);
     }
 
-        @Override
-        public void onLoggedOut() {
+    @Override
+    public void onLoggedOut() {
         Log.d("MainActivity", "User logged out");
     }
 
@@ -114,13 +126,13 @@ public class spotifyController extends Activity implements
         Log.d("MainActivity", "Login failed");
     }
 
-        @Override
-        public void onTemporaryError() {
+    @Override
+    public void onTemporaryError() {
         Log.d("MainActivity", "Temporary error occurred");
     }
 
-        @Override
-        public void onConnectionMessage(String message) {
+    @Override
+    public void onConnectionMessage(String message) {
         Log.d("MainActivity", "Received connection message: " + message);
     }
 
