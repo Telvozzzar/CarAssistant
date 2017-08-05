@@ -9,15 +9,9 @@
 
     <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
-
-        <ImageView
-            android:id="@+id/imageView"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="80dp" />
+        android:layout_height="fill_parent"
+        tools:layout_editor_absoluteX="-16dp"
+        tools:layout_editor_absoluteY="110dp">
 
         <TextView
             android:id="@+id/textView"
@@ -59,6 +53,35 @@
             android:layout_below="@+id/progressBar"
             android:text="Wit.ai Demo" />
 
+        <Button
+            android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginEnd="69dp"
+            android:layout_marginTop="959dp"
+            android:text="Button" />
+
+        <Button
+            android:id="@+id/btn_record"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:text='"Record"' />
+
+        <EditText
+            android:id="@+id/tb_search_query"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/switch_demo"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="64dp"
+            android:ems="10"
+            android:inputType="textPersonName" />
+
     </RelativeLayout>
+
 
 </android.support.constraint.ConstraintLayout>
