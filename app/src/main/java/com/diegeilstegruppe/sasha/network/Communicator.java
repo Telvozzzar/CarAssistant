@@ -5,6 +5,8 @@ import android.os.Looper;
 import android.util.Log;
 
 import com.diegeilstegruppe.sasha.service.Notifications.BusProvider;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.squareup.otto.Produce;
 
 import java.io.File;
@@ -27,10 +29,10 @@ public class Communicator {
     private static final String TAG = "Communicator";
 
     private static final String API_URL = "https://api.wit.ai/";
-    private static final String API_KEY = "66NIUDMXAU6R25XPLDJXKL72S3BVVVWN";
-    private static final String API_VER = "19.05.2017";
+    private static final String API_KEY = "MRWFOWZ4LKEMEJ5K7GDMQJWUO6CWHPAZ";
+    private static final String API_VER = "20170815";
 
-    private Interface service;
+    private witAiApi service;
 
     public Communicator() {
 
@@ -44,42 +46,28 @@ public class Communicator {
         httpClient.addInterceptor(new BasicAuthInterceptor("Bearer", Communicator.API_KEY));
         httpClient.addInterceptor(logging);
 
+        Gson gson = new GsonBuilder()
+                .setLenient()
+                .create();
+
         //The Retrofit builder will have the client attached, in order to get connection logs
         retrofit = new Retrofit.Builder()
                 .client(httpClient.build())
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
                 .baseUrl(API_URL)
                 .build();
 
-        service = retrofit.create(Interface.class);
+        service = retrofit.create(witAiApi.class);
     }
 
     private Retrofit retrofit;
 
-    public void send(String query) {
-
-        Call<ServerResponse> call = service.get(query, Communicator.API_VER);
-
-        call.enqueue(new Callback<ServerResponse>() {
-            @Override
-            public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
-                // BusProvider.getInstance().post(new ServerEvent(response.body()));
-                Log.e(TAG, "Success");
-            }
-
-            @Override
-            public void onFailure(Call<ServerResponse> call, Throwable t) {
-                // handle execution failures like no internet connectivity
-                // BusProvider.getInstance().post(new ErrorEvent(-2,t.getMessage()));
-                Log.e(TAG, "Failure");
-            }
-        });
-    }
 
 
-    public void uploadFile(File file) {
+
+    public void uploadFile(final File file) {
         // create upload service client
-        Interface service = retrofit.create(Interface.class);
+        witAiApi service = retrofit.create(witAiApi.class);
         // finally, execute the request
         Call<ServerResponse> call = service.post(RequestBody.create(MediaType.parse("audio/wav"), file));
 
@@ -90,16 +78,17 @@ public class Communicator {
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
-                        //Log.v("aaa", "bbb");
                         BusProvider.getInstance().post(new ResponseEvent(response.body()));
                     }
                 });
                 Log.v("Upload", "success");
+                file.delete();
             }
 
             @Override
             public void onFailure(Call<ServerResponse> call, Throwable t) {
                 Log.e("Upload error:", t.getMessage());
+                file.delete();
             }
         });
     }

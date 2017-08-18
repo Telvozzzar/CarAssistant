@@ -84,7 +84,7 @@ public class NotificationService extends NotificationListenerService {
         Log.d(TAG, "NewMessageNotifiedEvent");
 
         final String mFileName =  getCacheDir().getAbsolutePath() + "/audio.wav";
-        final WavAudioRecorder wavAudioRecorder = WavAudioRecorder.getInstanse();
+        final WavAudioRecorder wavAudioRecorder = WavAudioRecorder.getInstance();
         wavAudioRecorder.setOutputFile(mFileName);
         wavAudioRecorder.prepare();
         wavAudioRecorder.start();

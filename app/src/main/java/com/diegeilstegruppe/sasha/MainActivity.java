@@ -1,29 +1,29 @@
 package com.diegeilstegruppe.sasha;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.SearchView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.diegeilstegruppe.sasha.audio.Speech;
 import com.diegeilstegruppe.sasha.audio.SpeechRecorder;
 import com.diegeilstegruppe.sasha.audio.WavAudioRecorder;
 import com.diegeilstegruppe.sasha.network.Communicator;
+import com.diegeilstegruppe.sasha.network.ResponseEvent;
 import com.diegeilstegruppe.sasha.service.Notifications.BusProvider;
+import com.google.gson.internal.LinkedHashTreeMap;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
@@ -34,12 +34,14 @@ import com.spotify.sdk.android.player.Player;
 import com.spotify.sdk.android.player.PlayerEvent;
 import com.spotify.sdk.android.player.Spotify;
 import com.spotify.sdk.android.player.SpotifyPlayer;
+import com.squareup.otto.Subscribe;
 
-import java.util.List;
+import org.w3c.dom.Node;
+
+import java.io.File;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
-import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.TracksPager;
 import retrofit.Callback;
 import retrofit.RetrofitError;
@@ -75,16 +77,19 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
     private MediaPlayer mediaPlayer;
     private Communicator communicator;
     private Player player;
+    private SpotifyService spotify;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         try {
-
-        /*final String mFileName =  getCacheDir().getAbsolutePath() + "/audio.wav";
-        wavAudioRecorder = WavAudioRecorder.getInstanse();
-        wavAudioRecorder.setOutputFile(mFileName);*/
             super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_main);
+            ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
+            final String mFileName =  getCacheDir().getAbsolutePath() + "/audio.wav";
+            wavAudioRecorder = WavAudioRecorder.getInstance();
+
+
+
         /*final TextView text = (TextView) findViewById(R.id.textView);
 
         final Switch switch_activated = (Switch) findViewById(R.id.switch_activated);
@@ -141,30 +146,68 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
 
             AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
 
-            Button fab = (Button) findViewById(R.id.btn_record);
-            final SpotifyService spotify = api.getService();
+            final Button button = (Button) findViewById(R.id.btn_record);
+            spotify = api.getService();
 
-            fab.setOnClickListener(new View.OnClickListener() {
+            BusProvider.getInstance().register(this);
+
+            button.setOnTouchListener(new View.OnTouchListener() {
                 @Override
-                public void onClick(View view) {
-                    String searchquery = ((EditText)findViewById(R.id.tb_search_query)).getText().toString();
-                    //the following code snipped uses the WebApi to find tracks you can also search Albums or anything.
-                    spotify.searchTracks(searchquery, new Callback<TracksPager>() {
-                        @Override
-                        public void success(TracksPager tracksPager, Response response) {
-                            String s = tracksPager.tracks.items.iterator().next().uri;   //get first element of results
-                            mPlayer.playUri(null,s,0,0); //this is the SpotifyPlayer. Just check its methods
+                public boolean onTouch(View v, MotionEvent event) {
+                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                        // Pressed
+                        button.animate();
+                        if(mPlayer.getPlaybackState().isPlaying) {
+                            mPlayer.pause(new Player.OperationCallback() {
+                                @Override
+                                public void onSuccess() {
+                                    wavAudioRecorder.setOutputFile(mFileName);
+                                    wavAudioRecorder.prepare();
+                                    wavAudioRecorder.start();
+                                }
+
+                                @Override
+                                public void onError(Error error) {
+                                    Toast toast = Toast.makeText(getApplicationContext(), "Pause not successfull!", Toast.LENGTH_LONG);
+                                    toast.show();
+                                }
+                            });
                         }
-
-                        @Override
-                        public void failure(RetrofitError error) {
-                            Log.d("Callback Failure", error.getMessage());
-
+                        else {
+                            wavAudioRecorder.setOutputFile(mFileName);
+                            wavAudioRecorder.prepare();
+                            wavAudioRecorder.start();
                         }
-                    });
+                        return true;
+                    } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                        // Released
 
+                        Log.d("State WaveRecorder: ", wavAudioRecorder.getState().toString());
+                        wavAudioRecorder.stop();
+
+                        Log.d("State WaveRecorder: ", wavAudioRecorder.getState().toString());
+                        wavAudioRecorder.reset();
+
+                        Log.d("State WaveRecorder: ", wavAudioRecorder.getState().toString());
+                        /*try{
+                            mediaPlayer = new MediaPlayer();
+                            mediaPlayer.setDataSource(mFileName);
+                            mediaPlayer.prepare();
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+                        mediaPlayer.start();*/
+
+                        communicator = new Communicator();
+
+                        File file = new File(mFileName);
+                        communicator.uploadFile(file);
+
+                    }
+                    return true;
                 }
             });
+
 
         }
         catch (Exception e){
@@ -196,17 +239,20 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
             finish();
         }
     }
+    @Subscribe public void answerAvailable(ResponseEvent event) {
+        String searchquery = event.getResponse().getText().toString();
+        ((EditText)findViewById(R.id.tb_search_query)).setText(searchquery, TextView.BufferType.EDITABLE);
 
+        searchAndPlaySong(searchquery);
+    }
     @Override
     public void onPause() {
         super.onPause();
-        BusProvider.getInstance().unregister(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        BusProvider.getInstance().register(this);
 
     }
     @Override
@@ -243,7 +289,6 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
     public void onLoggedIn() {
         Log.d("MainActivity", "User logged in");
         api.setAccessToken(ACCESS_TOKEN);
-        mPlayer.playUri(null, "spotify:track:2TpxZ7JUBn3uw46aR7qd6V", 0, 0);
     }
 
     @Override
@@ -292,5 +337,21 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
                 });
             }
         }
+    }
+
+    private void searchAndPlaySong(String query){
+        spotify.searchTracks(query, new Callback<TracksPager>() {
+            @Override
+            public void success(TracksPager tracksPager, Response response) {
+                String bestMatch = tracksPager.tracks.items.iterator().next().uri;   //get first element of results
+                mPlayer.playUri(null,bestMatch,0,0); //this is the SpotifyPlayer. Just check its methods
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                Log.d("Callback Failure", error.getMessage());
+
+            }
+        });
     }
 }

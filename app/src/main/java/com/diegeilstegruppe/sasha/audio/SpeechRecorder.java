@@ -2,7 +2,6 @@ package com.diegeilstegruppe.sasha.audio;
 
 import android.content.Context;
 import android.media.MediaPlayer;
-import android.media.MediaRecorder;
 import android.util.Log;
 
 import java.io.IOException;
@@ -32,7 +31,7 @@ public class SpeechRecorder {
 
     public void startRecording() {
         //int audioSource, int sampleRate, int channelConfig, int audioFormat
-        mRecorder = WavAudioRecorder.getInstanse();
+        mRecorder = WavAudioRecorder.getInstance();
         mRecorder.setOutputFile(mFileName);
 
         try {

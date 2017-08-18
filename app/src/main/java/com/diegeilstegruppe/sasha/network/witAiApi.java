@@ -12,7 +12,7 @@ import retrofit2.http.Query;
  * Created by denys on 19/05/2017.
  */
 
-public interface Interface {
+public interface witAiApi {
 
     @GET("/message")
     Call<ServerResponse> get(

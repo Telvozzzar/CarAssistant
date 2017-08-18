@@ -12,7 +12,7 @@ import android.util.Log;
 public class WavAudioRecorder {
 	private final static int[] sampleRates = {44100, 22050, 11025, 8000};
 
-	public static WavAudioRecorder getInstanse() {
+	public static WavAudioRecorder getInstance() {
 		WavAudioRecorder result = null;
 		int i=0;
 		do {
