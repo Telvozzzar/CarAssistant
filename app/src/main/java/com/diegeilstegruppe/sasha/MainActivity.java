@@ -138,13 +138,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
 */
 
         //Spotify Player
-            AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID,
-                    AuthenticationResponse.Type.TOKEN,
-                    REDIRECT_URI);
-            builder.setScopes(new String[]{"user-read-private", "streaming"});
-            AuthenticationRequest request = builder.build();
-
-            AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
+            logintoSpotify();
 
             final Button button = (Button) findViewById(R.id.btn_record);
             spotify = api.getService();
@@ -156,7 +150,6 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
                 public boolean onTouch(View v, MotionEvent event) {
                     if (event.getAction() == MotionEvent.ACTION_DOWN) {
                         // Pressed
-                        button.animate();
                         if(mPlayer.getPlaybackState().isPlaying) {
                             mPlayer.pause(new Player.OperationCallback() {
                                 @Override
@@ -198,6 +191,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
                         }
                         mediaPlayer.start();*/
 
+                        mPlayer.resume(null);
                         communicator = new Communicator();
 
                         File file = new File(mFileName);
@@ -240,10 +234,39 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         }
     }
     @Subscribe public void answerAvailable(ResponseEvent event) {
-        String searchquery = event.getResponse().getText().toString();
-        ((EditText)findViewById(R.id.tb_search_query)).setText(searchquery, TextView.BufferType.EDITABLE);
 
-        searchAndPlaySong(searchquery);
+        switch (event.getResponse().getEntities().getIntent().iterator().next().getValue()) {
+            case "logout":
+                mPlayer.logout();
+                break;
+            case "login":
+                logintoSpotify();
+                break;
+            case "play":
+                String searchquery = event.getResponse().getEntities().getSearchQuery().iterator().next().getValue();
+                searchAndPlaySong(searchquery);
+                break;
+            case "pause":
+                mPlayer.pause(null);
+                break;
+            case "skip":
+                mPlayer.skipToNext(null);
+                break;
+            case "addToQueue":
+                searchAndQueueSong(event.getResponse().getEntities().getSearchQuery().iterator().next().getValue());
+                break;
+            case "resume":
+                //TODO:add debug information and logs whatsoever
+                mPlayer.resume(null);
+                break;
+            case "search":
+                //make something to display search!
+                break;
+            default:
+                Toast toast = Toast.makeText(getApplicationContext(), "No Intent found!", Toast.LENGTH_LONG);
+                toast.show();
+                return;
+        }
     }
     @Override
     public void onPause() {
@@ -262,6 +285,9 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         super.onDestroy();
     }
 
+
+
+    //Overrides from spotify Player
     @Override
     public void onPlaybackEvent(PlayerEvent playerEvent) {
         Log.d("MainActivity", "Playback event received: " + playerEvent.name());
@@ -353,5 +379,38 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
 
             }
         });
+    }
+
+    private void searchAndQueueSong(String query){
+        spotify.searchTracks(query, new Callback<TracksPager>() {
+            @Override
+            public void success(TracksPager tracksPager, Response response) {
+                String bestMatch = tracksPager.tracks.items.iterator().next().uri;   //get first element of results
+                mPlayer.queue(null,bestMatch); //this is the SpotifyPlayer. Just check its methods
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                Log.d("Callback Failure", error.getMessage());
+
+            }
+        });
+    }
+
+    private boolean logintoSpotify(){
+        try {
+            AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID,
+                    AuthenticationResponse.Type.TOKEN,
+                    REDIRECT_URI);
+            builder.setScopes(new String[]{"user-read-private", "streaming"});
+            AuthenticationRequest request = builder.build();
+
+            AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
+            return true;
+        }catch (Exception e){
+            Toast toast = Toast.makeText(getApplicationContext(), "Login not successfull!", Toast.LENGTH_LONG);
+            toast.show();
+            return false;
+        }
     }
 }
