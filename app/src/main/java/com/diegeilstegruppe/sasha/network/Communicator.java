@@ -30,7 +30,7 @@ public class Communicator {
 
     private static final String API_URL = "https://api.wit.ai/";
     private static final String API_KEY = "HLL2QUN7QCVTVWDL4PNN5XJAIBRFTMBZ";
-    private static final String API_VER = "20170815";
+    private static final String API_VER = "20170820";
 
     private witAiApi service;
 

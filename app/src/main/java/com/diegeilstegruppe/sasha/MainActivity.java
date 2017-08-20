@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.diegeilstegruppe.sasha.audio.WavAudioRecorder;
 import com.diegeilstegruppe.sasha.network.Communicator;
@@ -23,6 +24,8 @@ import com.spotify.sdk.android.player.Spotify;
 import com.spotify.sdk.android.player.SpotifyPlayer;
 import com.squareup.otto.Subscribe;
 import java.io.File;
+
+import static com.diegeilstegruppe.sasha.R.id.tb_search_query;
 
 public class MainActivity extends AppCompatActivity implements SpotifyPlayer.NotificationCallback,ConnectionStateCallback {
 
@@ -50,12 +53,12 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
             button.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
+                    boolean wasPlaying = false;
                     if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                        spotify.pauseWhileRecording(wavAudioRecorder, mFileName);
+                        wasPlaying = spotify.pauseWhileRecording(wavAudioRecorder, mFileName);
                         return true;
                     } else if (event.getAction() == MotionEvent.ACTION_UP) {
                         // Released
-
                         Log.d("State WaveRecorder: ", wavAudioRecorder.getState().toString());
                         wavAudioRecorder.stop();
 
@@ -63,11 +66,13 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
                         wavAudioRecorder.reset();
 
                         Log.d("State WaveRecorder: ", wavAudioRecorder.getState().toString());
-                        spotify.resume();
+
                         communicator = new Communicator();
 
                         File file = new File(mFileName);
                         communicator.uploadFile(file);
+                        if(wasPlaying)
+                            spotify.resume();
 
                     }
                     return true;
@@ -100,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         }
     }
     @Subscribe public void answerAvailable(ResponseEvent event) {
-
+/*
         if(event.getResponse().getText().toLowerCase().contains("spotify")){
             if(event.getResponse().getText().toLowerCase().contains("logout")){
                 spotify.logout();
@@ -136,42 +141,50 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
             Toast toast = Toast.makeText(getApplicationContext(), "No Intent found!", Toast.LENGTH_LONG);
             toast.show();
             return;
-            }
-        }
+            }*/
 
-        /*switch (event.getResponse().getEntities().getIntent().iterator().next().getValue()) {
+        TextView tv = (TextView) findViewById(tb_search_query);
+        String query = event.getResponse().getEntities().getSearchQuery().iterator().next().getValue();
+        String intent = event.getResponse().getEntities().getIntent().iterator().next().getValue();
+        switch (intent) {
             case "logout":
+                tv.setText(intent);
                 spotify.logout();
                 break;
             case "login":
+                tv.setText(intent);
                 spotify.logintoSpotify();
                 break;
             case "play":
-                String searchquery = event.getResponse().getEntities().getSearchQuery().iterator().next().getValue();
-                spotify.searchAndPlaySong(searchquery);
+                tv.setText(intent + ": " + query);
+                spotify.searchAndPlaySong(query);
                 break;
             case "pause":
+                tv.setText(intent);
                 spotify.pause();
                 break;
             case "skip":
+                tv.setText(intent);
                 spotify.skipToNext();
                 break;
             case "addToQueue":
-                spotify.searchAndQueueSong(event.getResponse().getEntities().getSearchQuery().iterator().next().getValue());
+                tv.setText(intent + ": " + query);
+                spotify.searchAndQueueSong(query);
                 break;
             case "resume":
-                //TODO:add debug information and logs whatsoever
+                tv.setText(intent);
                 spotify.resume();
                 break;
             case "search":
-                //make something to display search!
+                tv.setText(intent + ": " + query);
+                //TODO: DisplaySearch!
                 break;
             default:
                 Toast toast = Toast.makeText(getApplicationContext(), "No Intent found!", Toast.LENGTH_LONG);
                 toast.show();
                 return;
-        }*/
-
+        }
+    }
     @Override
     public void onPause() {
         super.onPause();

@@ -56,7 +56,15 @@ public class Spotify {
         notificationCallback = _notificationCallback;
     }
 
-    public void pauseWhileRecording(final WavAudioRecorder wavAudioRecorder, final String mFileName){
+
+    public boolean isPlaying(){
+        if(mPlayer.getPlaybackState().isPlaying)
+            return true;
+        else
+            return false;
+    }
+
+    public boolean pauseWhileRecording(final WavAudioRecorder wavAudioRecorder, final String mFileName){
         if(mPlayer.getPlaybackState().isPlaying) {
             mPlayer.pause(new Player.OperationCallback() {
                 @Override
@@ -72,11 +80,13 @@ public class Spotify {
                     toast.show();
                 }
             });
+            return true;
         }
         else {
             wavAudioRecorder.setOutputFile(mFileName);
             wavAudioRecorder.prepare();
             wavAudioRecorder.start();
+            return false;
         }
     }
 
