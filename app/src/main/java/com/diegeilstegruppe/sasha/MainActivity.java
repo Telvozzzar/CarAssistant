@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.diegeilstegruppe.sasha.audio.WavAudioRecorder;
 import com.diegeilstegruppe.sasha.network.Communicator;
@@ -112,7 +113,9 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
             }
             if(event.getResponse().getText().toLowerCase().contains("play")){
                     String searchquery = event.getResponse().getEntities().getSearchQuery().iterator().next().getValue();
-                    spotify.searchAndPlaySong(searchquery);
+                    String displayText = spotify.searchAndPlaySong(searchquery);
+                TextView textView = (TextView) findViewById(R.id.tv_search_query);
+                textView.setText(displayText);
                 return;
             }
             if(event.getResponse().getText().toLowerCase().contains("pause")) {

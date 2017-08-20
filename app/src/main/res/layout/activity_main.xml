@@ -39,15 +39,16 @@
             android:layout_centerVertical="true"
             android:text='"Record"' />
 
-        <EditText
-            android:id="@+id/tb_search_query"
+        <TextView
+            android:id="@+id/tv_search_query"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/switch_demo"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="64dp"
             android:ems="10"
-            android:inputType="textPersonName" />
+            android:inputType="textPersonName"
+            />
 
     </RelativeLayout>
 
