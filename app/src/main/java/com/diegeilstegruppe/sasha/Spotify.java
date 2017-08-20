@@ -164,7 +164,7 @@ public void logout(){
         });
     }
 
-    public void searchAndPlaySong(String query){
+    public String searchAndPlaySong(String query){
         spotify.searchTracks(query, new Callback<TracksPager>() {
             @Override
             public void success(TracksPager tracksPager, Response response) {
@@ -178,6 +178,8 @@ public void logout(){
 
             }
         });
+
+        return mPlayer.getMetadata().currentTrack.artistName + " - " + mPlayer.getMetadata().currentTrack.name;
     }
 
 

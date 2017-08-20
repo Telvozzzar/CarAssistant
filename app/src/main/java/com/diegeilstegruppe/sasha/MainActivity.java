@@ -117,7 +117,9 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
             }
             if(event.getResponse().getText().toLowerCase().contains("play")){
                     String searchquery = event.getResponse().getEntities().getSearchQuery().iterator().next().getValue();
-                    spotify.searchAndPlaySong(searchquery);
+                    String displayText = spotify.searchAndPlaySong(searchquery);
+                TextView textView = (TextView) findViewById(R.id.tv_search_query);
+                textView.setText(displayText);
                 return;
             }
             if(event.getResponse().getText().toLowerCase().contains("pause")) {
