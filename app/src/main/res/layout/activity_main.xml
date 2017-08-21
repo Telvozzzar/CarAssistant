@@ -7,50 +7,55 @@
     android:layout_height="match_parent"
     tools:context="com.diegeilstegruppe.sasha.MainActivity">
 
-    <RelativeLayout
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        tools:layout_editor_absoluteX="-16dp"
-        tools:layout_editor_absoluteY="110dp">
+        <LinearLayout
+            android:layout_width="368dp"
+            android:layout_height="551dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:visibility="visible"
+            tools:layout_editor_absoluteY="8dp"
+            tools:layout_editor_absoluteX="8dp">
 
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="128dp"
-            android:layout_height="128dp"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:visibility="gone" />
+            <TextView
+                android:id="@+id/tv_search_query"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="This is what Sasha understood..."
+                android:layout_below="@+id/switch_demo"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="64dp"
+                android:ems="10"
+                android:gravity="top"
+                android:inputType="textPersonName" />
 
-        <Button
-            android:id="@+id/button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginEnd="69dp"
-            android:layout_marginTop="959dp"
-            android:text="Button" />
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="128dp"
+                android:layout_height="128dp"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:visibility="gone" />
 
-        <Button
-            android:id="@+id/btn_record"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:text='"Record"' />
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/searchResults"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
 
-        <TextView
-            android:id="@+id/tv_search_query"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/switch_demo"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="64dp"
-            android:ems="10"
-            android:inputType="textPersonName"
-            />
+            </android.support.v7.widget.RecyclerView>
 
-    </RelativeLayout>
+            <Button
+                android:id="@+id/btn_record"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_toStartOf="@+id/button"
+                android:gravity="bottom"
+                android:text='"Record"' />
 
+
+        </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>
