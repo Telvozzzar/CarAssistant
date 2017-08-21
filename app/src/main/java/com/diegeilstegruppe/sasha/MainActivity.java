@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -29,6 +30,12 @@ import com.squareup.otto.Subscribe;
 import java.io.File;
 import java.util.ArrayList;
 
+import kaaes.spotify.webapi.android.models.Album;
+import kaaes.spotify.webapi.android.models.AlbumSimple;
+import kaaes.spotify.webapi.android.models.AlbumsPager;
+import kaaes.spotify.webapi.android.models.Playlist;
+import kaaes.spotify.webapi.android.models.PlaylistSimple;
+import kaaes.spotify.webapi.android.models.PlaylistsPager;
 import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.TracksPager;
 
@@ -48,8 +55,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
     private RecyclerView recyclerView;
     private RecyclerView.Adapter searchAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
-    private ArrayList<Track> results = new ArrayList<>();
-
+    private ArrayList<Parcelable> results = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -171,8 +177,15 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
                 break;
             case "search":
                 tv.setText(intent + ": " + query);
-                results.clear();
                 spotify.showSearchResults(query);
+                break;
+            case "searchPlaylist":
+                tv.setText(intent + ": " + query);
+                spotify.searchPlaylists(query);
+                break;
+            case "searchAlbum":
+                tv.setText(intent + ": " + query);
+                spotify.searchAlbum(query);
                 break;
             default:
                 Toast toast = Toast.makeText(getApplicationContext(), "No Intent found!", Toast.LENGTH_LONG);
@@ -183,6 +196,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
 
     @Subscribe
     public void resultsReady(TracksPager results){
+        this.results.clear();
         for (Track t: results.tracks.items) {
             this.results.add(t);
         }
@@ -192,7 +206,26 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
 
     @Subscribe
     public void onUriPost(String uri){
-        spotify.searchAndPlaySong(uri);
+        spotify.playSong(uri);
+    }
+
+    @Subscribe
+    public void onPlaylistPost(PlaylistsPager playlists){
+        this.results.clear();
+        for (PlaylistSimple pl: playlists.playlists.items) {
+            this.results.add(pl);
+        }
+        searchAdapter = new SpotifySearchAdapter(this.results, getApplicationContext());
+        recyclerView.setAdapter(searchAdapter);
+    }
+    @Subscribe
+    public void onAlbumPost(AlbumsPager albums){
+        this.results.clear();
+        for (AlbumSimple pl: albums.albums.items) {
+            this.results.add(pl);
+        }
+        searchAdapter = new SpotifySearchAdapter(this.results, getApplicationContext());
+        recyclerView.setAdapter(searchAdapter);
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.diegeilstegruppe.sasha;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Parcelable;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -29,7 +30,11 @@ import java.util.ArrayList;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
+import kaaes.spotify.webapi.android.models.AlbumSimple;
+import kaaes.spotify.webapi.android.models.AlbumsPager;
 import kaaes.spotify.webapi.android.models.Image;
+import kaaes.spotify.webapi.android.models.PlaylistSimple;
+import kaaes.spotify.webapi.android.models.PlaylistsPager;
 import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.TracksPager;
 import retrofit.Callback;
@@ -161,6 +166,7 @@ public class Spotify {
         spotifyWebApi.searchTracks(query, new Callback<TracksPager>() {
             @Override
             public void success(TracksPager tracksPager, Response response) {
+                BusProvider.getInstance().post(tracksPager);
                 String bestMatch = tracksPager.tracks.items.iterator().next().uri;   //get first element of results
                 spotifyPlayer.queue(null,bestMatch); //this is the SpotifyPlayer. Just check its methods
             }
@@ -173,10 +179,30 @@ public class Spotify {
         });
     }
 
+    public void searchPlaylists(String query){
+        spotifyWebApi.searchPlaylists(query, new Callback<PlaylistsPager>() {
+            @Override
+            public void success(PlaylistsPager playlistsPager, Response response) {
+                BusProvider.getInstance().post(playlistsPager);
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                //TODO
+            }
+        });
+    }
+
+    public void playSong(String uri){
+        spotifyPlayer.playUri(null,uri,0,0); //this is the SpotifyPlayer. Just check its methods
+        Log.d("Spotify.playSong", "play Song successful!");
+    }
+
     public void searchAndPlaySong(String query){
         spotifyWebApi.searchTracks(query, new Callback<TracksPager>() {
             @Override
             public void success(TracksPager tracksPager, Response response) {
+                BusProvider.getInstance().post(tracksPager);
                 String bestMatch = tracksPager.tracks.items.iterator().next().uri;   //get first element of results
                 spotifyPlayer.playUri(null,bestMatch,0,0); //this is the SpotifyPlayer. Just check its methods
                 Log.d("Spotify.searchAndPLay", "searchAndPLay successful!");
@@ -207,14 +233,27 @@ public class Spotify {
     }
 
 
+    public void searchAlbum(String query) {
+        spotifyWebApi.searchAlbums(query, new Callback<AlbumsPager>() {
+            @Override
+            public void success(AlbumsPager albumsPager, Response response) {
+                BusProvider.getInstance().post(albumsPager);
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                //TODO
+            }
+        });
+    }
 }
 class SpotifySearchAdapter extends RecyclerView.Adapter<SpotifySearchAdapter.ViewHolder> {
-    ArrayList<Track> mDataset;
+    static ArrayList<Parcelable> mDataset;
     Context mContext;
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
-    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         // each data item is just a string in this case
         public String uri;
         public TextView title, subtitle;
@@ -224,15 +263,15 @@ class SpotifySearchAdapter extends RecyclerView.Adapter<SpotifySearchAdapter.Vie
             title = (TextView)  v.findViewById(R.id.entity_title);
             subtitle  = (TextView) v.findViewById(R.id.entity_subtitle);
             cover = (ImageView) v.findViewById(R.id.entity_image);
+            itemView.setOnClickListener(this);
         }
         @Override
         public void onClick(View v) {
             BusProvider.getInstance().post(uri);
         }
     }
-
     // Provide a suitable constructor (depends on the kind of dataset)
-    public SpotifySearchAdapter(ArrayList<Track> myDataset, Context mContext) {
+    public SpotifySearchAdapter(ArrayList<Parcelable> myDataset, Context mContext) {
         mDataset = myDataset;
         this.mContext = mContext;
     }
@@ -253,13 +292,41 @@ class SpotifySearchAdapter extends RecyclerView.Adapter<SpotifySearchAdapter.Vie
     public void onBindViewHolder(ViewHolder holder, int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        holder.title.setText(mDataset.get(position).name);
-        holder.subtitle.setText(mDataset.get(position).album.name);
-        Image image = mDataset.get(position).album.images.get(0);
-        if (image != null) {
-            Picasso.with(mContext).load(image.url).into(holder.cover);
+        Parcelable element = mDataset.get(position);
+        if(element instanceof Track){
+            Track track = (Track) element;
+            holder.title.setText(track.name);
+            holder.subtitle.setText(track.album.name);
+            Image image = track.album.images.get(0);
+            if (image != null) {
+                Picasso.with(mContext).load(image.url).into(holder.cover);
+            }
+            holder.uri = track.uri;
+        }else if(element instanceof PlaylistSimple){
+            PlaylistSimple playlist = (PlaylistSimple) element;
+            holder.title.setText(playlist.name);
+            holder.subtitle.setText("Placeholder!");
+            Image image = playlist.images.get(0);
+            if(image != null){
+                Picasso.with(mContext).load(image.url).into(holder.cover);
+            }
+            holder.uri = playlist.uri;
+        }else if(element instanceof AlbumSimple){
+            AlbumSimple album = (AlbumSimple) element;
+            holder.title.setText(album.name);
+            holder.subtitle.setText("Placeholder!");
+            Image image = album.images.get(0);
+            if(image != null){
+                Picasso.with(mContext).load(image.url).into(holder.cover);
+            }
+            holder.uri = album.uri;
         }
-        holder.uri = mDataset.get(position).uri;
+        else{
+            holder.title.setText("Not implemented!");
+            holder.subtitle.setText("Not implemented!");
+        }
+
+
 
     }
 
