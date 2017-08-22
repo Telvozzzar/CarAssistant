@@ -164,6 +164,7 @@ public class Spotify {
         spotifyWebApi.getMyPlaylists(options,new Callback<Pager<PlaylistSimple>>() {
             @Override
             public void success(Pager<PlaylistSimple> playlistSimplePager, Response response) {
+                if(playlistSimplePager != null)
                 BusProvider.getInstance().post(playlistSimplePager);
             }
 
@@ -180,6 +181,7 @@ public class Spotify {
         spotifyWebApi.getMySavedTracks(options,new Callback<Pager<SavedTrack>>() {
             @Override
             public void success(Pager<SavedTrack> savedTrackPager, Response response) {
+                if(savedTrackPager != null)
                 BusProvider.getInstance().post(savedTrackPager);
             }
 
@@ -196,6 +198,7 @@ public class Spotify {
         spotifyWebApi.getMySavedAlbums(options,new Callback<Pager<SavedAlbum>>() {
             @Override
             public void success(Pager<SavedAlbum> savedAlbumPager, Response response) {
+                if(savedAlbumPager != null)
                 BusProvider.getInstance().post(savedAlbumPager);
             }
 
