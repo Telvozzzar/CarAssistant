@@ -156,61 +156,63 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
 
     @Subscribe
     public void onPagerPost(Pager pager){
-        Object firstElemet = pager.items.iterator().next();
-        if(firstElemet instanceof PlaylistSimple) {
-            Pager<PlaylistSimple> results = pager;
-            for (PlaylistSimple pl: results.items) {
-                this.results.add(pl);
+        if(!pager.items.isEmpty()){
+            Object firstElemet = pager.items.iterator().next();
+            if (firstElemet instanceof PlaylistSimple) {
+                Pager<PlaylistSimple> results = pager;
+                for (PlaylistSimple pl : results.items) {
+                    this.results.add(pl);
+                }
+            } else if (firstElemet instanceof TrackSimple) {
+                Pager<TrackSimple> results = pager;
+                for (TrackSimple pl : results.items) {
+                    this.results.add(pl);
+                }
+            } else if (firstElemet instanceof AlbumSimple) {
+                Pager<AlbumSimple> results = pager;
+                for (AlbumSimple pl : results.items) {
+                    this.results.add(pl);
+                }
+            } else if (firstElemet instanceof ArtistSimple) {
+                Pager<ArtistSimple> results = pager;
+                for (ArtistSimple pl : results.items) {
+                    this.results.add(pl);
+                }
+            } else if (firstElemet instanceof Track) {
+                Pager<Track> results = pager;
+                for (Track pl : results.items) {
+                    this.results.add(pl);
+                }
+            } else if (firstElemet instanceof Album) {
+                Pager<Album> results = pager;
+                for (Album pl : results.items) {
+                    this.results.add(pl);
+                }
+            } else if (firstElemet instanceof Artist) {
+                Pager<Artist> results = pager;
+                for (Artist pl : results.items) {
+                    this.results.add(pl);
+                }
+            } else if (firstElemet instanceof Playlist) {
+                Pager<Playlist> results = pager;
+                for (Playlist pl : results.items) {
+                    this.results.add(pl);
+                }
+            } else if (firstElemet instanceof SavedAlbum) {
+                Pager<SavedAlbum> results = pager;
+                for (SavedAlbum pl : results.items) {
+                    this.results.add(pl);
+                }
+            } else if (firstElemet instanceof SavedTrack) {
+                Pager<SavedTrack> results = pager;
+                for (SavedTrack pl : results.items) {
+                    this.results.add(pl);
+                }
             }
-        }else if (firstElemet instanceof TrackSimple){
-            Pager<TrackSimple> results = pager;
-            for (TrackSimple pl: results.items) {
-                this.results.add(pl);
-            }
-        }else if (firstElemet instanceof AlbumSimple){
-            Pager<AlbumSimple> results = pager;
-            for (AlbumSimple pl: results.items) {
-                this.results.add(pl);
-            }
-        }else if (firstElemet instanceof ArtistSimple){
-            Pager<ArtistSimple> results = pager;
-            for (ArtistSimple pl: results.items) {
-                this.results.add(pl);
-            }
-        }else if (firstElemet instanceof Track){
-            Pager<Track> results = pager;
-            for (Track pl: results.items) {
-                this.results.add(pl);
-            }
-        }else if (firstElemet instanceof Album){
-            Pager<Album> results = pager;
-            for (Album pl: results.items) {
-                this.results.add(pl);
-            }
-        }else if (firstElemet instanceof Artist) {
-            Pager<Artist> results = pager;
-            for (Artist pl : results.items) {
-                this.results.add(pl);
-            }
-        }else if (firstElemet instanceof Playlist) {
-            Pager<Playlist> results = pager;
-            for (Playlist pl : results.items) {
-                this.results.add(pl);
-            }
-        }else if (firstElemet instanceof SavedAlbum) {
-            Pager<SavedAlbum> results = pager;
-            for (SavedAlbum pl : results.items) {
-                this.results.add(pl);
-            }
-        }else if (firstElemet instanceof SavedTrack) {
-            Pager<SavedTrack> results = pager;
-            for (SavedTrack pl : results.items) {
-                this.results.add(pl);
-            }
-        }
 
-        searchAdapter = new SpotifySearchAdapter(this.results, getApplicationContext());
-        recyclerView.setAdapter(searchAdapter);
+            searchAdapter = new SpotifySearchAdapter(this.results, getApplicationContext());
+            recyclerView.setAdapter(searchAdapter);
+        }
     }
     @Subscribe
     public void onPlaylistPost(PlaylistsPager playlists){
