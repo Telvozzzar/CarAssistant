@@ -16,8 +16,7 @@ public interface witAiApi {
 
     @GET("/message")
     Call<ServerResponse> get(
-            @Query("q") String query,
-            @Query("v") String version
+            @Query("q") String query
     );
 
 

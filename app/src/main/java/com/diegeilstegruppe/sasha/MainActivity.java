@@ -5,6 +5,9 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.provider.ContactsContract;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -15,28 +18,37 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.diegeilstegruppe.sasha.audio.WavAudioRecorder;
 import com.diegeilstegruppe.sasha.network.Communicator;
 import com.diegeilstegruppe.sasha.network.ResponseEvent;
+import com.diegeilstegruppe.sasha.network.SearchQuery;
 import com.diegeilstegruppe.sasha.network.SpotifySearchAdapter;
 import com.diegeilstegruppe.sasha.service.Notifications.BusProvider;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
 import com.spotify.sdk.android.player.Error;
+import com.spotify.sdk.android.player.Metadata;
 import com.spotify.sdk.android.player.PlayerEvent;
 import com.spotify.sdk.android.player.Spotify;
 import com.spotify.sdk.android.player.SpotifyPlayer;
 import com.squareup.otto.Subscribe;
+import com.squareup.picasso.Picasso;
+
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Locale;
 
 import kaaes.spotify.webapi.android.models.Album;
 import kaaes.spotify.webapi.android.models.AlbumSimple;
 import kaaes.spotify.webapi.android.models.AlbumsPager;
 import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistSimple;
+import kaaes.spotify.webapi.android.models.Image;
 import kaaes.spotify.webapi.android.models.Pager;
 import kaaes.spotify.webapi.android.models.Playlist;
 import kaaes.spotify.webapi.android.models.PlaylistSimple;
@@ -47,22 +59,27 @@ import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.TrackSimple;
 import kaaes.spotify.webapi.android.models.TracksPager;
 
+import static android.speech.RecognizerIntent.EXTRA_RESULTS;
+import static com.diegeilstegruppe.sasha.R.id.album_image;
+import static com.diegeilstegruppe.sasha.R.id.play;
 import static com.diegeilstegruppe.sasha.R.id.tv_search_query;
+import static com.diegeilstegruppe.sasha.R.id.tv_track_name;
 
 
 public class MainActivity extends AppCompatActivity implements SpotifyPlayer.NotificationCallback,ConnectionStateCallback {
 
     private static final String TAG = "MainActivity";
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
+    private static final int SPEECHRECOGNITION_REQUESTCODE = 42;
     private boolean permissionToRecordAccepted = false;
     private WavAudioRecorder wavAudioRecorder;
     private Communicator communicator;
     private com.diegeilstegruppe.sasha.Spotify spotify;
+    private final int SPOTIFY_LOGIN_REQUESTCODE = 1337;
 
     //for the searchView
     private RecyclerView recyclerView;
     private RecyclerView.Adapter searchAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
     private ArrayList<Parcelable> results = new ArrayList<>();
 
     @Override
@@ -70,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         try {
             super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_main);
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
             //search results
             recyclerView = (RecyclerView) findViewById(R.id.searchResults);
@@ -87,13 +105,57 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
 
             //init spotify Player
             spotify = com.diegeilstegruppe.sasha.Spotify.getInstance(this, this, this, this);
+            spotify.logintoSpotify();
 
             //init bus for ServerResponses
             BusProvider.getInstance().register(this);
 
-            //iinit Layout
-            final Button button = (Button) findViewById(R.id.btn_record);
-            button.setOnTouchListener(new View.OnTouchListener() {
+            //init Layout
+            final Button recordButton = (Button) findViewById(R.id.btn_record);
+
+            recordButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(spotify.isPlaying())
+                        spotify.pause();
+                    Intent speechRecognitionIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                    speechRecognitionIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.ENGLISH);
+                    startActivityForResult(speechRecognitionIntent,SPEECHRECOGNITION_REQUESTCODE);
+                }
+            });
+            final ImageButton nextButton = (ImageButton) findViewById(R.id.btn_next_track);
+            nextButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    spotify.skipToNext();
+                }
+            });
+
+            final ImageButton previousButton = (ImageButton) findViewById(R.id.btn_previous_track);
+            previousButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    spotify.skipToPrevious();
+                }
+            });
+
+            final ImageButton playButton = (ImageButton) findViewById(R.id.btn_play_pause);
+            playButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(spotify.isPlaying())
+                        spotify.pause();
+                    else
+                        spotify.resume();
+                }
+            });
+
+            /**
+             * DEPRICATED!!
+             * This is only for voice recording and sending this record to wit.ai.
+             * Slower and also requires to keep the button pressed while recording...
+             */
+            /*button.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
                     if (event.getAction() == MotionEvent.ACTION_DOWN) {
@@ -116,7 +178,7 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
                     }
                     return true;
                 }
-            });
+            });*/
         }
         catch (Exception e){
             e.printStackTrace();
@@ -238,7 +300,11 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
         String query= null;
         String intent = null;
         if(event.getResponse().getEntities().getSearchQuery()!= null) {
-            query= event.getResponse().getEntities().getSearchQuery().iterator().next().getValue();
+            query ="";
+            for (SearchQuery s: event.getResponse().getEntities().getSearchQuery()) {
+                query += " " +s.getValue();
+
+            }
         }
         if(event.getResponse().getEntities().getIntent() != null) {
             intent= event.getResponse().getEntities().getIntent().iterator().next().getValue();
@@ -339,6 +405,16 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
             case kSpPlaybackNotifyAudioDeliveryDone:
                 Log.d("onPlayBackEvent","kSpPlayBackNotifyAudioDelivery");
                 spotify.skipToNext();
+            case kSpPlaybackNotifyMetadataChanged:
+                Metadata metadata = spotify.getSpotifyPlayer().getMetadata();
+                ImageView iv = (ImageView)findViewById(album_image);
+                TextView tv = (TextView)findViewById(tv_track_name);
+                tv.setText(metadata.currentTrack.name);
+                String url = metadata.currentTrack.albumCoverWebUrl;
+                if( url != null){
+                    Picasso.with(this).load(url).into(iv);
+                }
+
             default:
                 break;
         }
@@ -380,19 +456,12 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
-        spotify.startPlayer(requestCode, resultCode, intent);
-    }
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        String itemName = item.getTitle().toString();
-        switch (itemName){
-            case "Add":
-                break;
-            case "Play":
-                break;
-            default:
+        if(requestCode == SPOTIFY_LOGIN_REQUESTCODE && resultCode == RESULT_OK)
+            spotify.startPlayer(requestCode, resultCode, intent);
+        if(requestCode == SPEECHRECOGNITION_REQUESTCODE && resultCode == RESULT_OK){
+            spotify.resumeIfWasPlaying();
+            communicator = new Communicator();
+            communicator.sendText(intent.getStringArrayListExtra(EXTRA_RESULTS).get(0));
         }
-        return super.onContextItemSelected(item);
     }
 }

@@ -97,4 +97,27 @@ public class Communicator {
     public ResponseEvent produceResponseEvent(ServerResponse serverResponse) {
         return new ResponseEvent(serverResponse);
     }
+
+    public void sendText(String s) {
+        witAiApi service = retrofit.create(witAiApi.class);
+        // finally, execute the request
+        Call<ServerResponse> call = service.get(s);
+        call.enqueue(new Callback<ServerResponse>() {
+            @Override
+            public void onResponse(Call<ServerResponse> call, final Response<ServerResponse> response) {
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        BusProvider.getInstance().post(new ResponseEvent(response.body()));
+                    }
+                });
+                Log.v("Upload", "success");
+            }
+
+            @Override
+            public void onFailure(Call<ServerResponse> call, Throwable t) {
+                Log.e("Upload error:", t.getMessage());
+            }
+        });
+    }
 }

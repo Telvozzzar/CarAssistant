@@ -169,7 +169,7 @@ public class Spotify {
 
             @Override
             public void failure(RetrofitError error) {
-
+                Log.e("Spotify", error.getMessage());
             }
         });
     }
@@ -185,7 +185,7 @@ public class Spotify {
 
             @Override
             public void failure(RetrofitError error) {
-
+                Log.e("Spotify", error.getMessage());
             }
         });
     }
@@ -208,10 +208,37 @@ public class Spotify {
 
     //Controlls
     public void skipToNext(){
-    spotifyPlayer.skipToNext(null);
-}
+        if(spotifyPlayer.getMetadata().nextTrack!=null)
+            spotifyPlayer.skipToNext(new Player.OperationCallback() {
+                @Override
+                public void onSuccess() {
+                    Log.d("Spotify", "Skip successful!");
+                }
+
+                @Override
+                public void onError(Error error) {
+                    Log.d("Spotify", "Skip unsuccessful");
+                }
+            });
+    }
+    public void skipToPrevious(){
+        if(spotifyPlayer.getMetadata().prevTrack != null){
+            spotifyPlayer.skipToPrevious(new Player.OperationCallback() {
+                @Override
+                public void onSuccess() {
+                    Log.d("Spotify", "Skip successful!");
+                }
+
+                @Override
+                public void onError(Error error) {
+                    Log.d("Spotify", "Skip unsuccessful");
+                }
+            });
+        }
+    }
     public void resume(){
-        spotifyPlayer.resume(null);
+        if(spotifyPlayer.getMetadata().nextTrack!=null)
+            spotifyPlayer.resume(null);
     }
     public void logout(){
         spotifyPlayer.logout();
@@ -231,6 +258,9 @@ public class Spotify {
             spotifyPlayer.resume(null);
             wasPlaying = false;
         }
+    }
+    public Player getSpotifyPlayer(){
+        return spotifyPlayer;
     }
 
     //Search
