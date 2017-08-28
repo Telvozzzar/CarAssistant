@@ -359,16 +359,19 @@ public class MainActivity extends AppCompatActivity implements SpotifyPlayer.Not
                 spotify.searchArtist(query);
                 break;
             case "showMyTracks":
+                this.results.clear();
                 tv.setText(intent);
                 for(int i =0; i<10;i++)
                     spotify.showMyTracks(i*50);
                 break;
             case "showMyAlbums":
+                this.results.clear();
                 tv.setText(intent);
                 for(int i =0; i<10;i++)
                     spotify.showMyAlbums(i*50);
                 break;
             case "showMyPlaylists":
+                this.results.clear();
                 tv.setText(intent);
                 for(int i =0; i<10;i++)
                     spotify.showMyPlaylists(i*50);
