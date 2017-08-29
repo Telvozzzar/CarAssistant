@@ -1,4 +1,4 @@
-package com.diegeilstegruppe.sasha.network;
+package com.diegeilstegruppe.sasha.witAi;
 
 /**
  * Created by Telvozzzar on 19.08.2017.

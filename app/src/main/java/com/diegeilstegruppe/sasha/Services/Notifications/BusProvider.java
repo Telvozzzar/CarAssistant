@@ -1,4 +1,4 @@
-package com.diegeilstegruppe.sasha.service.Notifications;
+package com.diegeilstegruppe.sasha.Services.Notifications;
 
 import com.squareup.otto.Bus;
 

@@ -1,21 +1,13 @@
-package com.diegeilstegruppe.sasha;
+package com.diegeilstegruppe.sasha.Spotify;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Parcelable;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.diegeilstegruppe.sasha.audio.WavAudioRecorder;
-import com.diegeilstegruppe.sasha.service.Notifications.BusProvider;
+import com.diegeilstegruppe.sasha.Audio.WavAudioRecorder;
+import com.diegeilstegruppe.sasha.Services.Notifications.BusProvider;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
@@ -24,26 +16,20 @@ import com.spotify.sdk.android.player.ConnectionStateCallback;
 import com.spotify.sdk.android.player.Error;
 import com.spotify.sdk.android.player.Player;
 import com.spotify.sdk.android.player.SpotifyPlayer;
-import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
-import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
-import kaaes.spotify.webapi.android.models.AlbumSimple;
 import kaaes.spotify.webapi.android.models.AlbumsPager;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
-import kaaes.spotify.webapi.android.models.Image;
 import kaaes.spotify.webapi.android.models.Pager;
 import kaaes.spotify.webapi.android.models.PlaylistSimple;
 import kaaes.spotify.webapi.android.models.PlaylistsPager;
 import kaaes.spotify.webapi.android.models.SavedAlbum;
 import kaaes.spotify.webapi.android.models.SavedTrack;
-import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.TracksPager;
 import retrofit.Callback;
 import retrofit.RetrofitError;
@@ -53,9 +39,9 @@ import retrofit.client.Response;
  * Created by Alina on 20.08.2017.
  */
 
-public class Spotify {
-    private static Spotify instance;
-    //Spotify Player
+public class SpotifyController {
+    private static SpotifyController instance;
+    //SpotifyController Player
     private SpotifyService spotifyWebApi;
     private static final String CLIENT_ID = "7ae9d4102d804979b912d01b36b4fe66";
     private static final String REDIRECT_URI = "yourcustomprotocol://callback";
@@ -71,20 +57,20 @@ public class Spotify {
     Player.NotificationCallback notificationCallback;
     private boolean wasPlaying = false;
 
-    public static Spotify getInstance(){
+    public static SpotifyController getInstance(){
         //TODO unschön!
         return instance;
     }
 
-    public static Spotify getInstance(Context _context, Activity _activity, ConnectionStateCallback _connectionStateCallback, Player.NotificationCallback _notificationCallback){
-        if(Spotify.instance == null) {
-            Spotify.instance = new Spotify( _context,  _activity,  _connectionStateCallback,  _notificationCallback);
+    public static SpotifyController getInstance(Context _context, Activity _activity, ConnectionStateCallback _connectionStateCallback, Player.NotificationCallback _notificationCallback){
+        if(SpotifyController.instance == null) {
+            SpotifyController.instance = new SpotifyController( _context,  _activity,  _connectionStateCallback,  _notificationCallback);
         }
         BusProvider.getInstance().register(instance);
         return instance;
     }
 
-    private Spotify(Context _context, Activity _activity, ConnectionStateCallback _connectionStateCallback, Player.NotificationCallback _notificationCallback){
+    private SpotifyController(Context _context, Activity _activity, ConnectionStateCallback _connectionStateCallback, Player.NotificationCallback _notificationCallback){
         context = _context;
         activity = _activity;
         logintoSpotify();
@@ -126,9 +112,9 @@ public class Spotify {
                 com.spotify.sdk.android.player.Spotify.getPlayer(playerConfig, this, new SpotifyPlayer.InitializationObserver() {
                     @Override
                     public void onInitialized(SpotifyPlayer spotifyPlayer) {
-                        Spotify.this.spotifyPlayer = spotifyPlayer;
-                        Spotify.this.spotifyPlayer.addConnectionStateCallback(connectionStateCallback);
-                        Spotify.this.spotifyPlayer.addNotificationCallback(notificationCallback);
+                        SpotifyController.this.spotifyPlayer = spotifyPlayer;
+                        SpotifyController.this.spotifyPlayer.addConnectionStateCallback(connectionStateCallback);
+                        SpotifyController.this.spotifyPlayer.addNotificationCallback(notificationCallback);
                         ACCESS_TOKEN = response.getAccessToken();
                     }
 
@@ -169,7 +155,7 @@ public class Spotify {
 
             @Override
             public void failure(RetrofitError error) {
-                Log.e("Spotify", error.getMessage());
+                Log.e("SpotifyController", error.getMessage());
             }
         });
     }
@@ -185,7 +171,7 @@ public class Spotify {
 
             @Override
             public void failure(RetrofitError error) {
-                Log.e("Spotify", error.getMessage());
+                Log.e("SpotifyController", error.getMessage());
             }
         });
     }
@@ -212,12 +198,12 @@ public class Spotify {
             spotifyPlayer.skipToNext(new Player.OperationCallback() {
                 @Override
                 public void onSuccess() {
-                    Log.d("Spotify", "Skip successful!");
+                    Log.d("SpotifyController", "Skip successful!");
                 }
 
                 @Override
                 public void onError(Error error) {
-                    Log.d("Spotify", "Skip unsuccessful");
+                    Log.d("SpotifyController", "Skip unsuccessful");
                 }
             });
     }
@@ -226,12 +212,12 @@ public class Spotify {
             spotifyPlayer.skipToPrevious(new Player.OperationCallback() {
                 @Override
                 public void onSuccess() {
-                    Log.d("Spotify", "Skip successful!");
+                    Log.d("SpotifyController", "Skip successful!");
                 }
 
                 @Override
                 public void onError(Error error) {
-                    Log.d("Spotify", "Skip unsuccessful");
+                    Log.d("SpotifyController", "Skip unsuccessful");
                 }
             });
         }
@@ -248,7 +234,7 @@ public class Spotify {
     }
     public void playUri(String uri){
         spotifyPlayer.playUri(null,uri,0,0); //this is the SpotifyPlayer. Just check its methods
-        Log.d("Spotify.playUri", "play Song successful!");
+        Log.d("SpotifyController.playUri", "play Song successful!");
     }
     public void addSongToQueue(String uri) {
         spotifyPlayer.queue(null,uri);
@@ -313,12 +299,12 @@ public class Spotify {
                 BusProvider.getInstance().post(tracksPager);
                 String bestMatch = tracksPager.tracks.items.iterator().next().uri;   //get first element of results
                 spotifyPlayer.playUri(null,bestMatch,0,0); //this is the SpotifyPlayer. Just check its methods
-                Log.d("Spotify.searchAndPLay", "searchAndPLay successful!");
+                Log.d("SpotifyController.searchAndPLay", "searchAndPLay successful!");
             }
 
             @Override
             public void failure(RetrofitError error) {
-                Log.d("Spotify.searchAndPLay", error.getMessage());
+                Log.d("SpotifyController.searchAndPLay", error.getMessage());
 
             }
         });
@@ -359,6 +345,17 @@ public class Spotify {
         instance.playUri(uri);
     }
 
+    @Subscribe
+    public void inIntentPost(Intent intent){
+        switch (intent.getAction()) {
+            case "headsetStateChange":
+                if(spotifyPlayer != null)
+                pause();
+                break;
+            default:
+                Log.d("SpotifyController", "No Action for intent: "+intent.getAction() + " defined!");
+        }
+    }
 
 }
 

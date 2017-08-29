@@ -1,4 +1,4 @@
-package com.diegeilstegruppe.sasha.service.Notifications;
+package com.diegeilstegruppe.sasha.Services.Notifications;
 
 /**
  * Created by denys on 20/05/2017.

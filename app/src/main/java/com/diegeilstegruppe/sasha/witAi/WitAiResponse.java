@@ -1,9 +1,9 @@
 
-package com.diegeilstegruppe.sasha.network;
+package com.diegeilstegruppe.sasha.witAi;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class ServerResponse {
+public class WitAiResponse {
 
     @SerializedName("msg_id")
     @Expose

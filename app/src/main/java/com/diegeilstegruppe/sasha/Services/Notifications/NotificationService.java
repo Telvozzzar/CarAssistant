@@ -1,4 +1,4 @@
-package com.diegeilstegruppe.sasha.service.Notifications;
+package com.diegeilstegruppe.sasha.Services.Notifications;
 
 import android.app.Notification;
 import android.content.Intent;
@@ -8,10 +8,10 @@ import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.diegeilstegruppe.sasha.audio.Speech;
-import com.diegeilstegruppe.sasha.audio.WavAudioRecorder;
-import com.diegeilstegruppe.sasha.network.Communicator;
-import com.diegeilstegruppe.sasha.network.ServerResponse;
+import com.diegeilstegruppe.sasha.Audio.Speech;
+import com.diegeilstegruppe.sasha.Audio.WavAudioRecorder;
+import com.diegeilstegruppe.sasha.witAi.WitAiApiAccess;
+import com.diegeilstegruppe.sasha.witAi.WitAiResponse;
 import com.squareup.otto.Subscribe;
 
 import java.io.File;
@@ -27,7 +27,7 @@ public class NotificationService extends NotificationListenerService {
     public static final String TAG = "NotificationService";
 
     private Speech speech;
-    private Communicator communicator;
+    private WitAiApiAccess witAiApiAccess;
     private String message;
 
     @Override
@@ -96,14 +96,14 @@ public class NotificationService extends NotificationListenerService {
                 Log.d(TAG, "TimerTask: run");
                 wavAudioRecorder.stop();
                 wavAudioRecorder.reset();
-                communicator = new Communicator();
-                communicator.uploadFile(new File(mFileName));
+                witAiApiAccess = new WitAiApiAccess();
+                witAiApiAccess.uploadFile(new File(mFileName));
             }
         }, 5000);
     }
 
     @Subscribe
-    public void ResponseEvent(ServerResponse serverResponse) {
+    public void ResponseEvent(WitAiResponse witAiResponse) {
         Log.d(TAG, "ResponseEvent");
     }
 

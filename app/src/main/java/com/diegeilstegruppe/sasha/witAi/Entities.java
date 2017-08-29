@@ -1,4 +1,4 @@
-package com.diegeilstegruppe.sasha.network;
+package com.diegeilstegruppe.sasha.witAi;
 
 
 import java.util.List;

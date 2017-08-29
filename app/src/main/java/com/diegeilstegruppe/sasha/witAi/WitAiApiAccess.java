@@ -1,13 +1,12 @@
-package com.diegeilstegruppe.sasha.network;
+package com.diegeilstegruppe.sasha.witAi;
 
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
-import com.diegeilstegruppe.sasha.service.Notifications.BusProvider;
+import com.diegeilstegruppe.sasha.Services.Notifications.BusProvider;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.squareup.otto.Produce;
 
 import java.io.File;
 import okhttp3.MediaType;
@@ -24,17 +23,16 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * Created by denys on 19/05/2017.
  */
 
-public class Communicator {
+public class WitAiApiAccess {
 
-    private static final String TAG = "Communicator";
+    private static final String TAG = "WitAiApiAccess";
 
     private static final String API_URL = "https://api.wit.ai/";
     private static final String API_KEY = "HLL2QUN7QCVTVWDL4PNN5XJAIBRFTMBZ";
     private static final String API_VER = "20170820";
 
-    private witAiApi service;
 
-    public Communicator() {
+    public WitAiApiAccess() {
 
         //Here a logging interceptor is created
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
@@ -43,7 +41,7 @@ public class Communicator {
 
         //The logging interceptor will be added to the http client
         OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
-        httpClient.addInterceptor(new BasicAuthInterceptor("Bearer", Communicator.API_KEY));
+        httpClient.addInterceptor(new BasicAuthInterceptor("Bearer", WitAiApiAccess.API_KEY));
         httpClient.addInterceptor(logging);
 
         Gson gson = new GsonBuilder()
@@ -56,8 +54,6 @@ public class Communicator {
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .baseUrl(API_URL)
                 .build();
-
-        service = retrofit.create(witAiApi.class);
     }
 
     private Retrofit retrofit;
@@ -67,18 +63,18 @@ public class Communicator {
 
     public void uploadFile(final File file) {
         // create upload service client
-        witAiApi service = retrofit.create(witAiApi.class);
+        IwitAiApi service = retrofit.create(IwitAiApi.class);
         // finally, execute the request
-        Call<ServerResponse> call = service.post(RequestBody.create(MediaType.parse("audio/wav"), file));
+        Call<WitAiResponse> call = service.post(RequestBody.create(MediaType.parse("audio/wav"), file));
 
-        call.enqueue(new Callback<ServerResponse>() {
+        call.enqueue(new Callback<WitAiResponse>() {
             @Override
-            public void onResponse(Call<ServerResponse> call,
-                                   final Response<ServerResponse> response) {
+            public void onResponse(Call<WitAiResponse> call,
+                                   final Response<WitAiResponse> response) {
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
-                        BusProvider.getInstance().post(new ResponseEvent(response.body()));
+                        BusProvider.getInstance().post(response.body());
                     }
                 });
                 Log.v("Upload", "success");
@@ -86,36 +82,31 @@ public class Communicator {
             }
 
             @Override
-            public void onFailure(Call<ServerResponse> call, Throwable t) {
+            public void onFailure(Call<WitAiResponse> call, Throwable t) {
                 Log.e("Upload error:", t.getMessage());
                 file.delete();
             }
         });
     }
 
-    @Produce
-    public ResponseEvent produceResponseEvent(ServerResponse serverResponse) {
-        return new ResponseEvent(serverResponse);
-    }
-
     public void sendText(String s) {
-        witAiApi service = retrofit.create(witAiApi.class);
+        IwitAiApi service = retrofit.create(IwitAiApi.class);
         // finally, execute the request
-        Call<ServerResponse> call = service.get(s);
-        call.enqueue(new Callback<ServerResponse>() {
+        Call<WitAiResponse> call = service.get(s);
+        call.enqueue(new Callback<WitAiResponse>() {
             @Override
-            public void onResponse(Call<ServerResponse> call, final Response<ServerResponse> response) {
+            public void onResponse(Call<WitAiResponse> call, final Response<WitAiResponse> response) {
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
-                        BusProvider.getInstance().post(new ResponseEvent(response.body()));
+                        BusProvider.getInstance().post(response.body());
                     }
                 });
                 Log.v("Upload", "success");
             }
 
             @Override
-            public void onFailure(Call<ServerResponse> call, Throwable t) {
+            public void onFailure(Call<WitAiResponse> call, Throwable t) {
                 Log.e("Upload error:", t.getMessage());
             }
         });

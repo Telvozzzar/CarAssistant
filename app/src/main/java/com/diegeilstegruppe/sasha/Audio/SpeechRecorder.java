@@ -1,4 +1,4 @@
-package com.diegeilstegruppe.sasha.audio;
+package com.diegeilstegruppe.sasha.Audio;
 
 import android.content.Context;
 import android.media.MediaPlayer;

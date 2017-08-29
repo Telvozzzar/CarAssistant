@@ -1,4 +1,4 @@
-package com.diegeilstegruppe.sasha.audio;
+package com.diegeilstegruppe.sasha.Audio;
 
 import android.content.Context;
 import android.os.Build;
@@ -9,8 +9,8 @@ import android.speech.tts.UtteranceProgressListener;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.diegeilstegruppe.sasha.service.Notifications.BusProvider;
-import com.diegeilstegruppe.sasha.service.Notifications.NewMessageNotifiedEvent;
+import com.diegeilstegruppe.sasha.Services.Notifications.BusProvider;
+import com.diegeilstegruppe.sasha.Services.Notifications.NewMessageNotifiedEvent;
 import com.squareup.otto.Produce;
 
 import java.util.Locale;

@@ -1,4 +1,4 @@
-package com.diegeilstegruppe.sasha.audio;
+package com.diegeilstegruppe.sasha.Audio;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;

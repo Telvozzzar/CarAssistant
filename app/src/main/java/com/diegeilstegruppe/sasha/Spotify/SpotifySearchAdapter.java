@@ -1,21 +1,17 @@
-package com.diegeilstegruppe.sasha.network;
+package com.diegeilstegruppe.sasha.Spotify;
 
 import android.content.Context;
 import android.os.Parcelable;
 import android.support.v7.widget.RecyclerView;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.diegeilstegruppe.sasha.MainActivity;
 import com.diegeilstegruppe.sasha.R;
-import com.diegeilstegruppe.sasha.Spotify;
-import com.diegeilstegruppe.sasha.service.Notifications.BusProvider;
+import com.diegeilstegruppe.sasha.Services.Notifications.BusProvider;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -25,7 +21,6 @@ import kaaes.spotify.webapi.android.models.AlbumSimple;
 import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistSimple;
 import kaaes.spotify.webapi.android.models.Image;
-import kaaes.spotify.webapi.android.models.Pager;
 import kaaes.spotify.webapi.android.models.Playlist;
 import kaaes.spotify.webapi.android.models.PlaylistSimple;
 import kaaes.spotify.webapi.android.models.SavedAlbum;
@@ -60,7 +55,7 @@ public class SpotifySearchAdapter extends RecyclerView.Adapter<SpotifySearchAdap
 
         @Override
         public boolean onLongClick(View v) {
-            Spotify.getInstance().addSongToQueue(uri);
+            SpotifyController.getInstance().addSongToQueue(uri);
             Toast.makeText(mContext, "Added!", Toast.LENGTH_LONG).show();
             return true;
         }

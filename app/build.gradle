@@ -32,7 +32,7 @@ dependencies {
     })
     //noinspection GradleCompatible
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support:appcompat-v7:latest.release'
     compile 'com.android.support:recyclerview-v7:25.1.1'
     compile 'com.spotify.sdk:spotify-player-24-noconnect-2.20b@aar'
     compile 'com.android.support:appcompat-v7:25.3.1'
@@ -49,5 +49,6 @@ dependencies {
     compile 'com.github.spotify:android-auth:9425c6a140'
     compile 'org.springframework.android:spring-android-rest-template:1.0.1.RELEASE'
     compile 'com.github.kaaes:spotify-web-api-android:0.4.1'
+    compile 'com.google.android.gms:play-services:latest.release'
     testCompile 'junit:junit:4.12'
 }
